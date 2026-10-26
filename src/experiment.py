@@ -1,7 +1,7 @@
 """Protocolo común de entrenamiento y evaluación (D-0.1).
 
 - Entrenamiento: cada episodio usa una serie nueva del mismo mercado (semillas 0, 1, 2, ...).
-- Test: `N_TEST` series nuevas con semillas desde `TEST_SEED_OFFSET`, que nunca se ven al entrenar.
+- Test: `N_TEST` (200) series nuevas con semillas desde `TEST_SEED_OFFSET`, que nunca se ven al entrenar.
 - Resultados: `save_results()` escribe `results/NN_nombre.csv` con las columnas de `RESULT_COLUMNS`,
   para que el 04 solo tenga que concatenar.
 """
@@ -17,10 +17,11 @@ from .env import TREND_EDGES, SimpleTradingEnv, discretize
 from .markets import make_prices
 
 N_STEPS = 500
-N_TEST = 50
+N_TEST = 200   # D-0.1: con 50, el error estándar de la mediana es de ±5-8 puntos (00 §5)
+N_BINS = 5     # D-1.1: bins de tendencia por cuantiles de cada mercado (00 §7)
 TEST_SEED_OFFSET = 100_000
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
-RESULT_COLUMNS = ["agente", "mercado", "retorno_medio", "std", "sharpe", "max_drawdown",
+RESULT_COLUMNS = ["agente", "mercado", "retorno_mediana", "retorno_medio", "std", "sharpe", "max_drawdown",
                   "n_trades", "episodios_convergencia", "tiempo_s"]
 
 
@@ -119,6 +120,7 @@ def summarize(agent_name, market, test_df, rewards=None, train_time=0.0):
     return {
         "agente": agent_name,
         "mercado": market,
+        "retorno_mediana": test_df["retorno"].median(),
         "retorno_medio": test_df["retorno"].mean(),
         "std": test_df["retorno"].std(),
         "sharpe": test_df["sharpe"].mean(),

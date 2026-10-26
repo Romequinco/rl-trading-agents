@@ -8,15 +8,17 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
 ### D-0.1 · Protocolo común de entrenamiento y evaluación
 
 - **Fecha:** 2026-10-26
-- **Decisión provisional:** series de `N_STEPS = 500` pasos. En entrenamiento, cada episodio usa una
-  serie nueva del mismo mercado con semilla `0, 1, 2, ...`. Las de test son `N_TEST = 50` series
-  con semillas desde `100_000`, que no se ven nunca al entrenar, y se evalúan con política greedy y
-  sin aprender. Está implementado en `src/experiment.py` (`train`, `evaluate`) y todos los
-  notebooks lo usan.
+- **Decisión:** series de `N_STEPS = 500` pasos. En entrenamiento, cada episodio usa una serie nueva
+  del mismo mercado con semilla `0, 1, 2, ...`. Las de test son **`N_TEST = 200`** series con
+  semillas desde `100_000`, que no se ven nunca al entrenar, y se evalúan con política greedy y sin
+  aprender. Está implementado en `src/experiment.py` (`train`, `evaluate`) y todos los notebooks lo
+  usan.
 - **Justificación:** el taller pide series distintas por episodio y resultados promediados sobre
   varias series de test. Fijar las semillas hace comparables los números de todos los miembros.
-- **Pendiente:** confirmar `N_TEST` en el 00 (que la desviación de la media sea pequeña).
-- **Estado:** ABIERTA
+- **Evidencia (00 §5):** con 50 series, la mediana de buy & hold se mueve hasta 10 puntos
+  (browniano: +6,9 % con 50 y −3,5 % con 200). Con 200, el error estándar baja a ≈ ±4 puntos
+  (±0,6 en reversión a la media). Evaluar 200 series cuesta solo unos segundos por agente.
+- **Estado:** CERRADA (2026-10-26, en el 00)
 
 ### D-0.2 · Código común en `src/` y un notebook por línea de trabajo
 
@@ -51,9 +53,19 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   tendencia+ciclo y ≈ ±0,005 / ±0,02 en los otros tres. Coinciden con los fijos salvo en el mercado
   1. En una prueba rápida (300 episodios, código temporal) Q-Learning y SARSA entrenan sin errores
   con estos bordes.
-- **Propuesta:** (b) con 5 bins como opción por defecto, y probar (c) en el 01/02 como
-  hiperparámetro.
-- **Estado:** ABIERTA (se cierra en el 00)
+- **Evidencia de la calibración (00 §7.2):** Q-Learning con α = 0,001, γ = 0,9 y 500 episodios. La
+  mediana en test de las opciones fijos-5 / cuantiles-5 / cuantiles-10 es:
+  - mercado 1: x386 / x343 / x404 (buy & hold, x33);
+  - reversión a la media: +14,8 % / +11,8 % / +13,6 % (buy & hold, −0,3 %);
+  - browniano y regímenes: 0 % con las tres opciones (no opera).
+
+  Las diferencias están dentro del ruido de un solo entrenamiento.
+- **Decisión:** (b), **bins por cuantiles de cada mercado con `N_BINS = 5`** (10 estados),
+  `quantile_edges(m, N_BINS)`. Rinde igual que las otras opciones, tiene la mitad de estados que 10
+  bins y se adapta a la escala de cualquier mercado. Los bordes fijos solo funcionan en 2–4 por
+  coincidencia y en el mercado 1 saturan: 89 % de los pasos en los bins extremos (00 §4). 10 bins,
+  la sugerencia del profesor, queda como hiperparámetro para el 01/02.
+- **Estado:** CERRADA (2026-10-26, en el 00)
 
 ### D-0.3 · Métricas y convergencia
 
@@ -66,7 +78,24 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
 - **Problema:** en tendencia+ciclo el retorno compuesto con ruido del 10 % da medias enormes y muy
   dispersas (buy & hold +200x de media, std 477x). En ese mercado conviene añadir la mediana o el
   log-retorno para comparar.
-- **Estado:** ABIERTA
+- **Decisión (2026-10-26):** la métrica principal es la **mediana del retorno**
+  (`retorno_mediana`, añadida al esquema común), con la media ± std al lado. Con 200 series de
+  test, en el mercado 1 la media de buy & hold es +19 925 % y la mediana +3 262 %.
+- **Estado:** CERRADA
+
+### D-2.2 · La tasa de aprendizaje α debe ser pequeña
+
+- **Fecha:** 2026-10-26
+- **Evidencia (00 §7.1, Q-Learning con cuantiles-5, γ = 0,9, 500 episodios):** con α = 0,1 o 0,01
+  el agente **no opera nunca** en los mercados 2–4. Con α = 0,001 aprende en reversión a la media
+  (+11,8 %, 61 operaciones, política de comprar tras caídas y vender en máximos). La explicación es
+  que, con α constante, Q es una media exponencial cuyo ruido es ≈ σ√(α/2): 0,45 % con σ = 2 % y
+  α = 0,1, frente a una ventaja real de ≈ 0,1 % por paso.
+- **Implicación para 01/02:** barrer α en torno a 10⁻³ (o con decaimiento) antes que el resto de
+  hiperparámetros. Además, en el mercado de regímenes ningún α encuentra el seguimiento de
+  tendencia esperado: el agente se queda siempre fuera (0 %, frente a −12,5 % de buy & hold). Ese es
+  el reto principal.
+- **Estado:** ABIERTA (guía para el ajuste del 01/02)
 
 ### D-2.1 · Orden de actualización y estado terminal
 

@@ -58,19 +58,22 @@ pip install -r requirements.txt
 jupyter lab notebooks/
 ```
 
-- Todos los notebooks empiezan con la misma celda de setup, que importa de `src/`.
+- **Empezad por `notebooks/00_entorno_y_baselines.ipynb`**: explica el problema con figuras, mide los baselines y
+  cierra las decisiones comunes. Se lee en GitHub ya ejecutado.
+- Todos los notebooks empiezan con la misma celda de setup, que importa de `src/` (las figuras usan el estilo común
+  de `src/style.py`).
 - **Contrato común:**
   - `src/env.py` y `src/markets.py` son copia literal del taller y no se modifican; los mercados
     extra se añaden al final de `markets.py`.
   - Todos los agentes implementan `act(state, greedy)`, `update(s, a, r, s2, a2, done)` y
     `end_episode()`. Los tabulares reciben sus bins al crearse
-    (`QLearningAgent(edges=quantile_edges(mercado))`, D-1.1), y `run_episode` respeta el orden de
+    (`QLearningAgent(edges=quantile_edges(mercado, N_BINS))`, D-1.1), y `run_episode` respeta el orden de
     actualización de cada algoritmo (D-2.1).
   - El protocolo (series, semillas de train y test) está en `src/experiment.py` (D-0.1).
   - Cualquier cambio en `src/` se avisa al grupo y se registra en `docs/DECISIONES.md`.
 - **Líneas de trabajo en paralelo:** 01 (Q-Learning), 02 (SARSA) y 03 (extras). Cada una guarda
   `results/NN_<nombre>.csv` con `save_results()`, que usa las columnas `agente, mercado,
-  retorno_medio, std, sharpe, max_drawdown, n_trades, episodios_convergencia, tiempo_s`.
+  retorno_mediana, retorno_medio, std, sharpe, max_drawdown, n_trades, episodios_convergencia, tiempo_s`.
 - **04:** concatena los CSV, construye la tabla del informe y guarda las figuras en
   `results/figures/`.
 
@@ -94,13 +97,24 @@ jupyter lab notebooks/
 
 ## Resultados hasta ahora
 
-Pendiente.
+Mediana del retorno en 200 series de test (`results/00_baselines.csv`, 00 §6). El Q-Learning es el de calibración
+del 00 (α = 0,001, γ = 0,9, 500 episodios, 5 bins por cuantiles), no el agente final del 01.
+
+| Mercado | Aleatorio | Buy & hold | Q-Learning (calibración) | Política aprendida |
+|---|---|---|---|---|
+| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x343** | Sigue la tendencia |
+| 2 · Browniano | −19,4 % | −3,5 % | 0 % | No opera (no hay señal) |
+| 3 · Reversión a la media | −17,2 % | −0,3 % | **+11,8 %** | Compra tras caídas y vende en máximos |
+| 4 · Regímenes | −22,0 % | −12,5 % | 0 % | No opera (no encuentra el seguimiento de tendencia) |
+
+Claves (00 §8): **α tiene que ser pequeño** (≈ 10⁻³; con 0,1 el agente no opera en 2–4, D-2.2), en 2–4 "no operar" ya
+iguala o bate a buy & hold, y el reto es el mercado 4.
 
 ## Estado
 
 - [x] Estructura del repositorio y código común
 - [x] Documentación de teoría (`docs/teoria/`)
-- [ ] 00 Entorno y baselines (cerrar D-0.1 y D-1.1)
+- [x] 00 Entorno y baselines (D-0.1, D-1.1 y D-0.3 cerradas)
 - [ ] 01 Q-Learning
 - [ ] 02 SARSA
 - [ ] 03 Extras
