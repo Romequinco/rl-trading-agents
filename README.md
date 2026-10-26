@@ -98,16 +98,17 @@ jupyter lab notebooks/
 ## Resultados hasta ahora
 
 Mediana del retorno en 200 series de test (`results/00_baselines.csv`, 00 §6). El Q-Learning es el de calibración
-del 00 (α = 0,001, γ = 0,9, 500 episodios, 5 bins por cuantiles), no el agente final del 01.
+del 00 (α = 0,001, γ = 0,9, 500 episodios, 10 bins por cuantiles), no el agente final del 01.
 
 | Mercado | Aleatorio | Buy & hold | Q-Learning (calibración) | Política aprendida |
 |---|---|---|---|---|
-| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x343** | Sigue la tendencia |
+| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x404** | Sigue la tendencia |
 | 2 · Browniano | −19,4 % | −3,5 % | 0 % | No opera (no hay señal) |
-| 3 · Reversión a la media | −17,2 % | −0,3 % | **+11,8 %** | Compra tras caídas y vende en máximos |
+| 3 · Reversión a la media | −17,2 % | −0,3 % | **+13,6 %** | Compra tras caídas y vende en máximos |
 | 4 · Regímenes | −22,0 % | −12,5 % | 0 % | No opera (no encuentra el seguimiento de tendencia) |
 
-Claves (00 §8): **α tiene que ser pequeño** (≈ 10⁻³; con 0,1 el agente no opera en 2–4, D-2.2), en 2–4 "no operar" ya
+Claves (00 §8): **α tiene que ser pequeño** (entre 10⁻³ y 10⁻²; con 0,1 el agente no opera en 2–4, D-2.2), se usan
+**10 bins por cuantiles** como recomendó el profesor (D-1.1), en 2–4 "no operar" ya
 iguala o bate a buy & hold, y el reto es el mercado 4.
 
 ## Estado

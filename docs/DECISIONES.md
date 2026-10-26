@@ -60,11 +60,19 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   - browniano y regímenes: 0 % con las tres opciones (no opera).
 
   Las diferencias están dentro del ruido de un solo entrenamiento.
-- **Decisión:** (b), **bins por cuantiles de cada mercado con `N_BINS = 5`** (10 estados),
-  `quantile_edges(m, N_BINS)`. Rinde igual que las otras opciones, tiene la mitad de estados que 10
-  bins y se adapta a la escala de cualquier mercado. Los bordes fijos solo funcionan en 2–4 por
-  coincidencia y en el mercado 1 saturan: 89 % de los pasos en los bins extremos (00 §4). 10 bins,
-  la sugerencia del profesor, queda como hiperparámetro para el 01/02.
+- **Decisión:** (b)+(c), **bins por cuantiles de cada mercado con `N_BINS = 10`** (20 estados),
+  `quantile_edges(m, N_BINS)`.
+  - **Por qué 10:** es lo que recomendó el profesor en clase ("partís en 10 cachitos", transcripción
+    ~04:27). Además, en la calibración rinde igual o mejor que 5: es la mejor opción en el mercado 1
+    (x404) y la segunda en reversión (+13,6 %).
+  - **Por qué cuantiles:** cada bin recibe ≈ 10 % de los pasos y la discretización se adapta sola
+    a la escala de cualquier mercado (o de una serie real). Los bordes fijos solo funcionan en 2–4
+    por coincidencia y en el mercado 1 saturan: 89 % de los pasos en los dos bins extremos (00 §4).
+  - **Coste asumido:** 20 estados en lugar de 10, así que cada estado se visita la mitad y el
+    aprendizaje puede ser algo más lento. Con 500 episodios × 494 pasos no ha sido un problema.
+- **Historial:** el 2026-10-26 se fijó primero `N_BINS = 5`, porque rendía igual con menos estados.
+  El grupo prefirió seguir la recomendación del profesor, ya que la evidencia no distingue entre
+  las dos opciones.
 - **Estado:** CERRADA (2026-10-26, en el 00)
 
 ### D-0.3 · Métricas y convergencia
@@ -86,12 +94,12 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
 ### D-2.2 · La tasa de aprendizaje α debe ser pequeña
 
 - **Fecha:** 2026-10-26
-- **Evidencia (00 §7.1, Q-Learning con cuantiles-5, γ = 0,9, 500 episodios):** con α = 0,1 o 0,01
-  el agente **no opera nunca** en los mercados 2–4. Con α = 0,001 aprende en reversión a la media
-  (+11,8 %, 61 operaciones, política de comprar tras caídas y vender en máximos). La explicación es
-  que, con α constante, Q es una media exponencial cuyo ruido es ≈ σ√(α/2): 0,45 % con σ = 2 % y
-  α = 0,1, frente a una ventaja real de ≈ 0,1 % por paso.
-- **Implicación para 01/02:** barrer α en torno a 10⁻³ (o con decaimiento) antes que el resto de
+- **Evidencia (00 §7.1, Q-Learning con 10 bins por cuantiles, γ = 0,9, 500 episodios):** con
+  α = 0,1 el agente **no opera nunca** en los mercados 2–4. Con α = 0,01 y α = 0,001 aprende en
+  reversión a la media: +18,3 % y +13,6 % respectivamente, con una política de comprar tras caídas y
+  vender en subidas. La explicación es que, con α constante, Q es una media exponencial cuyo ruido
+  es ≈ σ√(α/2): 0,45 % con σ = 2 % y α = 0,1, frente a una ventaja real de ≈ 0,1 % por paso.
+- **Implicación para 01/02:** barrer α entre 10⁻³ y 10⁻² (o con decaimiento) antes que el resto de
   hiperparámetros. Además, en el mercado de regímenes ningún α encuentra el seguimiento de
   tendencia esperado: el agente se queda siempre fuera (0 %, frente a −12,5 % de buy & hold). Ese es
   el reto principal.
@@ -102,7 +110,7 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
 - **Fecha:** 2026-10-26
 - **Decisión:** se sigue el pseudocódigo de slides3. En SARSA (p31) se elige A' antes de
   actualizar; en Q-Learning (p36) se actualiza y después se elige la acción con la Q ya
-  actualizada. Esto importa porque, con solo 10 estados, `s2 == s` es frecuente. En el último paso
+  actualizada. Esto importa porque, con solo 20 estados, `s2 == s` es frecuente. En el último paso
   (`terminated`), el objetivo es solo `r`, porque Q(terminal, ·) = 0.
 - **Nota:** el final del episodio es en realidad un límite de tiempo y no un estado terminal del
   MDP. Como afecta a un único paso de unos 500, se acepta.

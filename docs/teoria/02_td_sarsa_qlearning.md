@@ -144,7 +144,7 @@ $$\text{Target}_{\text{Q-learning}}=R_{t+1}+\gamma\max_a Q(S_{t+1},a)\quad(\text
 
 ## Aplicación al taller
 
-**Código del repo** (`src/agents.py`, `src/experiment.py`): `TabularAgent` ya aporta $Q$ (10 estados × 3 acciones, inicializada a 0), `act()` $\epsilon$-greedy con desempate aleatorio y `end_episode()` con $\epsilon\leftarrow\max(\epsilon_{\min},\epsilon\cdot\text{decay})$ por episodio. Solo falta implementar `update(s,a,r,s2,a2,done)`.
+**Código del repo** (`src/agents.py`, `src/experiment.py`): `TabularAgent` ya aporta $Q$ (20 estados × 3 acciones con `N_BINS = 10`, inicializada a 0), `act()` $\epsilon$-greedy con desempate aleatorio y `end_episode()` con $\epsilon\leftarrow\max(\epsilon_{\min},\epsilon\cdot\text{decay})$ por episodio. Solo falta implementar `update(s,a,r,s2,a2,done)`.
 
 | Algoritmo | Clase | `a2` en `update` | Orden en `run_episode` | Slides |
 |---|---|---|---|---|
@@ -166,6 +166,6 @@ El `max` de Q-Learning corresponde a la política objetivo codiciosa (p34); el d
 **Comportamiento esperable en trading** (*Nota*, extrapolado de p40–p43):
 - *Q-Learning:* converge a la política óptima de su $Q$ (p35, p43), pero mientras $\epsilon$ sea alto su recompensa de entrenamiento será peor que la de Sarsa (p42).
 - *Sarsa:* sus valores incluyen el coste de las acciones exploratorias, así que cabe esperar políticas más conservadoras y mejor recompensa *online* con $\epsilon>0$ (p41–p42). La diferencia debería reducirse al decaer $\epsilon$.
-- Con solo 10 estados la tabla es pequeña, y con comisión del 0,1 % y series ruidosas las diferencias son un resultado empírico a medir, no algo que las slides garanticen.
+- Con solo 20 estados la tabla es pequeña, y con comisión del 0,1 % y series ruidosas las diferencias son un resultado empírico a medir, no algo que las slides garanticen.
 
 **Hiperparámetros a barrer** (los que las slides identifican como parámetros): $\alpha$ (p. ej. 0,01–0,5; menor $\alpha$ implica menos oscilación, p18), $\epsilon$ inicial, `epsilon_min` y `epsilon_decay` (cuándo $\epsilon\to0$, p43), $\gamma$ (p. ej. 0,9–0,99) y número de episodios. La inicialización de $Q$ queda en 0 por defecto (una inicialización optimista sería variante propia, no cubierta en las slides). Comparar ambos algoritmos con las mismas semillas en los 4 mercados (tendencia+ciclo, browniano, reversión a la media, regímenes).

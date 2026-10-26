@@ -95,9 +95,10 @@ class SimpleTradingEnv(gym.Env):
 
 
 # ---------------------------------------------------------------------------
-# Discretización del estado (D-1.1, provisional)
+# Discretización del estado (D-1.1)
 # ---------------------------------------------------------------------------
-# Bordes de los bins de la tendencia. Con 4 bordes salen 5 bins:
+# Bordes fijos de ejemplo (y valor por defecto de discretize). El proyecto usa
+# quantile_edges(mercado, N_BINS) con N_BINS = 10 (D-1.1). Con 4 bordes salen 5 bins:
 # bajista fuerte / bajista / lateral / alcista / alcista fuerte.
 TREND_EDGES = np.array([-0.02, -0.005, 0.005, 0.02])
 

@@ -18,7 +18,7 @@ from .markets import make_prices
 
 N_STEPS = 500
 N_TEST = 200   # D-0.1: con 50, el error estándar de la mediana es de ±5-8 puntos (00 §5)
-N_BINS = 5     # D-1.1: bins de tendencia por cuantiles de cada mercado (00 §7)
+N_BINS = 10    # D-1.1: bins de tendencia por cuantiles de cada mercado (00 §7, recomendación del profesor)
 TEST_SEED_OFFSET = 100_000
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 RESULT_COLUMNS = ["agente", "mercado", "retorno_mediana", "retorno_medio", "std", "sharpe", "max_drawdown",
