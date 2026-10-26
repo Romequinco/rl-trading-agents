@@ -63,7 +63,9 @@ jupyter lab notebooks/
   - `src/env.py` y `src/markets.py` son copia literal del taller y no se modifican; los mercados
     extra se añaden al final de `markets.py`.
   - Todos los agentes implementan `act(state, greedy)`, `update(s, a, r, s2, a2, done)` y
-    `end_episode()`.
+    `end_episode()`. Los tabulares reciben sus bins al crearse
+    (`QLearningAgent(edges=quantile_edges(mercado))`, D-1.1), y `run_episode` respeta el orden de
+    actualización de cada algoritmo (D-2.1).
   - El protocolo (series, semillas de train y test) está en `src/experiment.py` (D-0.1).
   - Cualquier cambio en `src/` se avisa al grupo y se registra en `docs/DECISIONES.md`.
 - **Líneas de trabajo en paralelo:** 01 (Q-Learning), 02 (SARSA) y 03 (extras). Cada una guarda

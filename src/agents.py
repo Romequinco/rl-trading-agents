@@ -2,14 +2,18 @@
 
 Todos exponen:
 - `act(state, greedy=False) -> int`: acción para el estado discreto `state`.
-- `update(s, a, r, s2, a2, done)`: aprendizaje tras un paso. `a2` es la acción que el agente
-  ya ha elegido para `s2` (la usa SARSA; Q-Learning la ignora).
+- `update(s, a, r, s2, a2, done)`: aprendizaje tras un paso. Si `done`, el objetivo es solo `r`
+  (Q(terminal, ·) = 0, como en slides3). `a2` es la acción ya elegida para `s2` solo si el agente
+  es `on_policy` (SARSA); en Q-Learning llega `None` y la acción se elige después de actualizar.
 - `end_episode()`: se llama al final de cada episodio de entrenamiento (decaimiento de epsilon).
 
-Los baselines no aprenden: `update` y `end_episode` no hacen nada.
+Los agentes tabulares llevan su discretización (`edges`), así la tabla Q y `run_episode` usan
+siempre los mismos bins. Los baselines no aprenden: `update` y `end_episode` no hacen nada.
 """
 
 import numpy as np
+
+from .env import TREND_EDGES, n_states
 
 SELL, HOLD, BUY = 0, 1, 2
 N_ACTIONS = 3
@@ -47,9 +51,12 @@ class BuyHoldAgent:
 class TabularAgent:
     """Base de los agentes tabulares: tabla Q y política epsilon-greedy con decaimiento."""
 
-    def __init__(self, n_states, alpha=0.1, gamma=0.99,
+    on_policy = False
+
+    def __init__(self, edges=TREND_EDGES, alpha=0.1, gamma=0.99,
                  epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.995, seed=None):
-        self.Q = np.zeros((n_states, N_ACTIONS))
+        self.edges = np.asarray(edges)
+        self.Q = np.zeros((n_states(self.edges), N_ACTIONS))
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -80,6 +87,8 @@ class QLearningAgent(TabularAgent):
 
 class SarsaAgent(TabularAgent):
     """SARSA (on-policy): objetivo r + gamma * Q(s2, a2)."""
+
+    on_policy = True
 
     def update(self, s, a, r, s2, a2, done):
         # TODO (02_sarsa)

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .env import SimpleTradingEnv, discretize
+from .env import TREND_EDGES, SimpleTradingEnv, discretize
 from .markets import make_prices
 
 N_STEPS = 500
@@ -25,9 +25,15 @@ RESULT_COLUMNS = ["agente", "mercado", "retorno_medio", "std", "sharpe", "max_dr
 
 
 def run_episode(env, agent, learn=True, greedy=False):
-    """Juega un episodio completo. Devuelve recompensa total, balances, acciones y posiciones."""
+    """Juega un episodio completo. Devuelve recompensa total, balances, acciones y posiciones.
+
+    Sigue el orden de los algoritmos de slides3: SARSA elige A' antes de actualizar (p31) y
+    Q-Learning actualiza y luego elige la acción con la Q ya actualizada (p36).
+    """
+    edges = getattr(agent, "edges", TREND_EDGES)
+    on_policy = getattr(agent, "on_policy", False)
     obs, _ = env.reset()
-    s = discretize(obs)
+    s = discretize(obs, edges)
     a = agent.act(s, greedy)
     total_reward = 0.0
     balances, actions, positions = [env.balance], [], []
@@ -36,10 +42,15 @@ def run_episode(env, agent, learn=True, greedy=False):
         positions.append(env.position)
         actions.append(a)
         obs, r, terminated, truncated, info = env.step(a)
-        s2 = discretize(obs)
-        a2 = agent.act(s2, greedy)
-        if learn:
-            agent.update(s, a, r, s2, a2, terminated)
+        s2 = discretize(obs, edges)
+        if on_policy:
+            a2 = agent.act(s2, greedy)
+            if learn:
+                agent.update(s, a, r, s2, a2, terminated)
+        else:
+            if learn:
+                agent.update(s, a, r, s2, None, terminated)
+            a2 = agent.act(s2, greedy)
         s, a = s2, a2
         total_reward += r
         balances.append(env.balance)
@@ -81,15 +92,26 @@ def evaluate(agent, market, n_test=N_TEST, n_steps=N_STEPS, greedy=True):
     return pd.DataFrame(rows)
 
 
-def convergence_episode(rewards, window=50, tol=0.05):
-    """Primer episodio a partir del cual la media móvil queda dentro de ±tol (relativo) de su valor final."""
+def convergence_episode(rewards, window=50, frac=0.9):
+    """Primer episodio en que la media móvil recorre `frac` del camino entre su valor inicial y el final
+    (episodios hasta el 90 % de la mejora). Robusto al ruido de la curva de recompensa."""
     if len(rewards) < window:
         return len(rewards)
-    ma = pd.Series(rewards).rolling(window).mean().to_numpy()
-    final = ma[-1]
-    band = tol * max(abs(final), 1e-8)
-    outside = np.flatnonzero(np.abs(ma[window - 1:] - final) > band)
-    return int(outside[-1] + window) if len(outside) else window - 1
+    ma = pd.Series(rewards).rolling(window).mean().to_numpy()[window - 1:]
+    target = ma[0] + frac * (ma[-1] - ma[0])
+    reached = ma >= target if ma[-1] >= ma[0] else ma <= target
+    return int(np.argmax(reached) + window - 1)
+
+
+def quantile_edges(market, n_bins=5, n_series=50, n_steps=N_STEPS, seed_offset=0):
+    """Bordes de tendencia por cuantiles de `market`, calculados solo con series de train (D-1.1)."""
+    trends = []
+    for i in range(n_series):
+        prices = make_prices(market, n_steps, seed_offset + i)
+        for t in range(5, n_steps):
+            window = prices[t - 5 : t + 1]
+            trends.append((window[-1] - np.mean(window)) / np.mean(window))
+    return np.quantile(np.clip(trends, -1.0, 1.0), np.linspace(0, 1, n_bins + 1)[1:-1])
 
 
 def summarize(agent_name, market, test_df, rewards=None, train_time=0.0):
