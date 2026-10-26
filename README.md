@@ -77,7 +77,16 @@ jupyter lab notebooks/
 ## Documentación
 
 - [`docs/DECISIONES.md`](docs/DECISIONES.md): decisiones del proyecto.
-- `docs/teoria/`: pendiente (síntesis de las slides, notebooks y transcripción de clase).
+- `docs/teoria/` (síntesis del material de clase, con la fuente exacta citada en cada concepto):
+  - `notebook_partida.md`: enunciado y rúbrica, el entorno con sus sutilezas, los 4 generadores y
+    qué estrategia cabe esperar en cada uno, los comentarios del profesor en clase (con minuto),
+    ideas para ir más allá y una checklist ligada a la rúbrica. **Empezad por aquí.**
+  - `00_fundamentos_mdp.md`: RL, bandits, MDP, retorno y γ, funciones de valor, ecuaciones de
+    Bellman y GridWorld.
+  - `01_dp_y_montecarlo.md`: iteración de políticas y de valores, Monte Carlo (ES, on y
+    off-policy), ε-greedy y qué enseña cada notebook de clase.
+  - `02_td_sarsa_qlearning.md`: TD(0), SARSA, Q-Learning, cliff walking, hiperparámetros y las
+    reglas de `update()` que hay que implementar. **Es el núcleo de la tarea.**
 - `docs/raw/` (local, no versionado): enunciado `taller_trader.ipynb`; slides `slides1.pdf`
   (fundamentos y MDP), `slides2.pdf` (programación dinámica y métodos tabulares) y `slides3.pdf`
   (TD learning); notebooks de clase (`gridworld`, `frozen_lake`, `taxi`, `gambler`, `blackjack`,
@@ -90,7 +99,7 @@ Pendiente.
 ## Estado
 
 - [x] Estructura del repositorio y código común
-- [ ] Documentación de teoría (`docs/teoria/`)
+- [x] Documentación de teoría (`docs/teoria/`)
 - [ ] 00 Entorno y baselines (cerrar D-0.1 y D-1.1)
 - [ ] 01 Q-Learning
 - [ ] 02 SARSA
