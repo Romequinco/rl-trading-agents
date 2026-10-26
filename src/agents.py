@@ -81,8 +81,9 @@ class QLearningAgent(TabularAgent):
     """Q-Learning (off-policy): objetivo r + gamma * max_a' Q(s2, a')."""
 
     def update(self, s, a, r, s2, a2, done):
-        # TODO (01_qlearning)
-        raise NotImplementedError
+        # Q(S,A) <- Q(S,A) + alpha [R + gamma max_a Q(S',a) - Q(S,A)]  (slides3 p36); Q(terminal) = 0
+        target = r if done else r + self.gamma * self.Q[s2].max()
+        self.Q[s, a] += self.alpha * (target - self.Q[s, a])
 
 
 class SarsaAgent(TabularAgent):

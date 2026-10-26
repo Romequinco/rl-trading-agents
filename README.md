@@ -58,6 +58,8 @@ pip install -r requirements.txt
 jupyter lab notebooks/
 ```
 
+- Los barridos de hiperparámetros usan `run_grid()` (en paralelo y con caché: reabrir un notebook no
+  reentrena). Para forzarlo, `RECALCULAR = True` en la celda de setup.
 - **Empezad por `notebooks/00_entorno_y_baselines.ipynb`**: explica el problema con figuras, mide los baselines y
   cierra las decisiones comunes. Se lee en GitHub ya ejecutado.
 - Todos los notebooks empiezan con la misma celda de setup, que importa de `src/` (las figuras usan el estilo común
@@ -97,26 +99,29 @@ jupyter lab notebooks/
 
 ## Resultados hasta ahora
 
-Mediana del retorno en 200 series de test (`results/00_baselines.csv`, 00 §6). El Q-Learning es el de calibración
-del 00 (α = 0,001, γ = 0,9, 500 episodios, 10 bins por cuantiles), no el agente final del 01.
+Mediana del retorno en las **200 series de test** (`results/00_baselines.csv`, `results/01_qlearning.csv`). Para
+Q-Learning es la mediana de 5 semillas, con hiperparámetros ajustados en validación (D-0.4, D-2.3).
 
-| Mercado | Aleatorio | Buy & hold | Q-Learning (calibración) | Política aprendida |
+| Mercado | Aleatorio | Buy & hold | **Q-Learning** | Estrategia aprendida |
 |---|---|---|---|---|
-| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x404** | Sigue la tendencia |
-| 2 · Browniano | −19,4 % | −3,5 % | 0 % | No opera (no hay señal) |
-| 3 · Reversión a la media | −17,2 % | −0,3 % | **+13,6 %** | Compra tras caídas y vende en máximos |
-| 4 · Regímenes | −22,0 % | −12,5 % | 0 % | No opera (no encuentra el seguimiento de tendencia) |
+| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | Sigue la tendencia (entra en bins 7–10, sale en 1–3) |
+| 2 · Browniano | −19,4 % | −3,5 % | **0 %** | No opera (correcto: no hay señal) |
+| 3 · Reversión a la media | −17,2 % | −0,3 % | **+27,0 %** | Compra tras la caída más fuerte y vende tras la subida más fuerte |
+| 4 · Regímenes | −22,0 % | −12,5 % | **0 %** | No opera: es lo óptimo con este estado (D-2.4) |
 
-Claves (00 §8): **α tiene que ser pequeño** (entre 10⁻³ y 10⁻²; con 0,1 el agente no opera en 2–4, D-2.2), se usan
-**10 bins por cuantiles** como recomendó el profesor (D-1.1), en 2–4 "no operar" ya
-iguala o bate a buy & hold, y el reto es el mercado 4.
+Claves:
+- α = 0,001 en todos los mercados; con 0,1 el agente no aprende (D-2.2).
+- γ depende del mercado: 0 en el 1 y 0,5 en el 3 (01 §4).
+- Q-Learning converge en ≈ 100–260 episodios.
+- En el mercado 4, ninguna de las 70 reglas simples sobre el estado (tendencia o reversión) bate a no operar, así que el límite está en el estado
+  y no en el algoritmo (01 §9).
 
 ## Estado
 
 - [x] Estructura del repositorio y código común
 - [x] Documentación de teoría (`docs/teoria/`)
 - [x] 00 Entorno y baselines (D-0.1, D-1.1 y D-0.3 cerradas)
-- [ ] 01 Q-Learning
+- [x] 01 Q-Learning (D-0.4, D-2.2, D-2.3 y D-2.4)
 - [ ] 02 SARSA
 - [ ] 03 Extras
 - [ ] 04 Comparativa

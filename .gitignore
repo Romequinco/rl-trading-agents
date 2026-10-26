@@ -231,3 +231,6 @@ docs/raw/
 *.pkl
 
 .DS_Store
+
+# Caché de barridos (curvas y tablas Q); se regenera con run_grid
+results/cache/

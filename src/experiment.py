@@ -1,12 +1,17 @@
 """Protocolo común de entrenamiento y evaluación (D-0.1).
 
-- Entrenamiento: cada episodio usa una serie nueva del mismo mercado (semillas 0, 1, 2, ...).
-- Test: `N_TEST` (200) series nuevas con semillas desde `TEST_SEED_OFFSET`, que nunca se ven al entrenar.
+- Entrenamiento: cada episodio usa una serie nueva del mismo mercado. Con la semilla de entrenamiento `seed`,
+  las series son `seed * TRAIN_SEED_STRIDE + 0, 1, 2, ...` (cada semilla ve series distintas).
+- Validación (D-0.4): `N_VAL` series desde `VAL_SEED_OFFSET`. Solo se usan para elegir hiperparámetros.
+- Test: `N_TEST` (200) series nuevas con semillas desde `TEST_SEED_OFFSET`. Solo para el resultado final.
 - Resultados: `save_results()` escribe `results/NN_nombre.csv` con las columnas de `RESULT_COLUMNS`,
   para que el 04 solo tenga que concatenar.
 """
 
+import os
 import time
+from concurrent.futures import ProcessPoolExecutor
+from functools import lru_cache
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -20,6 +25,9 @@ N_STEPS = 500
 N_TEST = 200   # D-0.1: con 50, el error estándar de la mediana es de ±5-8 puntos (00 §5)
 N_BINS = 10    # D-1.1: bins de tendencia por cuantiles de cada mercado (00 §7, recomendación del profesor)
 TEST_SEED_OFFSET = 100_000
+VAL_SEED_OFFSET = 50_000   # D-0.4
+N_VAL = 100
+TRAIN_SEED_STRIDE = 10_000
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 RESULT_COLUMNS = ["agente", "mercado", "retorno_mediana", "retorno_medio", "std", "sharpe", "max_drawdown",
                   "n_trades", "episodios_convergencia", "tiempo_s"]
@@ -83,11 +91,13 @@ def episode_metrics(balances, actions, positions):
     }
 
 
-def evaluate(agent, market, n_test=N_TEST, n_steps=N_STEPS, greedy=True):
-    """Evalúa sin aprender sobre `n_test` series de test. Devuelve un DataFrame (una fila por serie)."""
+def evaluate(agent, market, n_test=None, n_steps=N_STEPS, greedy=True, split="test"):
+    """Evalúa sin aprender sobre series de `split` ("test" o "val"). Devuelve un DataFrame (una fila por serie)."""
+    offset = {"test": TEST_SEED_OFFSET, "val": VAL_SEED_OFFSET}[split]
+    n_test = n_test or {"test": N_TEST, "val": N_VAL}[split]
     rows = []
     for i in range(n_test):
-        env = SimpleTradingEnv(make_prices(market, n_steps, TEST_SEED_OFFSET + i))
+        env = SimpleTradingEnv(make_prices(market, n_steps, offset + i))
         _, balances, actions, positions = run_episode(env, agent, learn=False, greedy=greedy)
         rows.append(episode_metrics(balances, actions, positions))
     return pd.DataFrame(rows)
@@ -104,15 +114,18 @@ def convergence_episode(rewards, window=50, frac=0.9):
     return int(np.argmax(reached) + window - 1)
 
 
-def quantile_edges(market, n_bins=5, n_series=50, n_steps=N_STEPS, seed_offset=0):
+def quantile_edges(market, n_bins=N_BINS, n_series=50, n_steps=N_STEPS, seed_offset=0):
     """Bordes de tendencia por cuantiles de `market`, calculados solo con series de train (D-1.1)."""
+    return np.array(_quantile_edges(market, n_bins, n_series, n_steps, seed_offset))
+
+
+@lru_cache(maxsize=None)
+def _quantile_edges(market, n_bins, n_series, n_steps, seed_offset):
     trends = []
     for i in range(n_series):
-        prices = make_prices(market, n_steps, seed_offset + i)
-        for t in range(5, n_steps):
-            window = prices[t - 5 : t + 1]
-            trends.append((window[-1] - np.mean(window)) / np.mean(window))
-    return np.quantile(np.clip(trends, -1.0, 1.0), np.linspace(0, 1, n_bins + 1)[1:-1])
+        w = np.lib.stride_tricks.sliding_window_view(make_prices(market, n_steps, seed_offset + i), 6)
+        trends.append((w[:, -1] - w.mean(axis=1)) / w.mean(axis=1))
+    return tuple(np.quantile(np.clip(np.concatenate(trends), -1.0, 1.0), np.linspace(0, 1, n_bins + 1)[1:-1]))
 
 
 def summarize(agent_name, market, test_df, rewards=None, train_time=0.0):
@@ -136,6 +149,67 @@ def save_results(rows, name):
     df = pd.DataFrame(rows, columns=RESULT_COLUMNS)
     df.to_csv(RESULTS_DIR / f"{name}.csv", index=False)
     return df
+
+
+# ---------------------------------------------------------------------------
+# Barridos de hiperparámetros en paralelo, con caché (01, 02)
+# ---------------------------------------------------------------------------
+CONFIG_KEYS = ["agente", "mercado", "n_bins", "alpha", "gamma", "epsilon_decay", "epsilon_min",
+               "n_episodes", "seed", "split"]
+CACHE_DIR = RESULTS_DIR / "cache"   # curvas y tablas Q (no versionado; se regenera)
+
+
+def config_id(cfg):
+    """Identificador estable de una configuración (los números se normalizan a float para que coincidan al leer el CSV)."""
+    norm = lambda v: float(v) if isinstance(v, (int, float, np.number)) and not isinstance(v, bool) else v
+    return "|".join(f"{k}={norm(cfg[k])}" for k in CONFIG_KEYS)
+
+
+def run_config(cfg):
+    """Entrena y evalúa una configuración (dict con `CONFIG_KEYS`). Devuelve (fila, curva, tabla Q)."""
+    from .agents import QLearningAgent, SarsaAgent
+    cls = {"qlearning": QLearningAgent, "sarsa": SarsaAgent}[cfg["agente"]]
+    offset = cfg["seed"] * TRAIN_SEED_STRIDE
+    assert offset + cfg["n_episodes"] <= VAL_SEED_OFFSET, "las series de train invadirían las de validación"
+    agent = cls(edges=quantile_edges(cfg["mercado"], cfg["n_bins"]), alpha=cfg["alpha"], gamma=cfg["gamma"],
+                epsilon_decay=cfg["epsilon_decay"], epsilon_min=cfg["epsilon_min"], seed=cfg["seed"])
+    rewards, t = train(agent, cfg["mercado"], cfg["n_episodes"], seed_offset=offset)
+    res = summarize(cfg["agente"], cfg["mercado"], evaluate(agent, cfg["mercado"], split=cfg["split"]), rewards, t)
+    return {**{k: cfg[k] for k in CONFIG_KEYS}, **{k: v for k, v in res.items() if k not in ("agente", "mercado")}},         rewards, agent.Q
+
+
+def run_grid(configs, name, n_jobs=None, recompute=False):
+    """Ejecuta `configs` en paralelo y cachea los resultados.
+
+    Resúmenes en `results/<name>.csv` (versionado) y curvas + tablas Q en `results/cache/<name>.npz`.
+    Solo se entrenan las configuraciones que faltan. Devuelve (DataFrame, {id: curva}, {id: Q}).
+    """
+    CACHE_DIR.mkdir(exist_ok=True)
+    csv, npz = RESULTS_DIR / f"{name}.csv", CACHE_DIR / f"{name}.npz"
+    rows, curves, qs = {}, {}, {}
+    if not recompute and csv.exists() and npz.exists():
+        old = pd.read_csv(csv)
+        arrays = np.load(npz)
+        for r in old.to_dict("records"):
+            cid = config_id(r)
+            if f"r::{cid}" in arrays:
+                rows[cid], curves[cid], qs[cid] = r, arrays[f"r::{cid}"], arrays[f"q::{cid}"]
+    todo = [c for c in configs if config_id(c) not in rows]
+    if todo:
+        n_jobs = n_jobs or max(1, (os.cpu_count() or 2) - 1)
+        print(f"Entrenando {len(todo)} configuraciones en {n_jobs} procesos "
+              f"({len(configs) - len(todo)} ya estaban en caché)...")
+        t0 = time.perf_counter()
+        with ProcessPoolExecutor(max_workers=n_jobs) as pool:
+            for cfg, (row, rew, q) in zip(todo, pool.map(run_config, todo)):
+                cid = config_id(cfg)
+                rows[cid], curves[cid], qs[cid] = row, rew, q
+        print(f"Hecho en {time.perf_counter() - t0:.0f} s")
+        pd.DataFrame(list(rows.values())).to_csv(csv, index=False)
+        np.savez_compressed(npz, **{f"r::{k}": v for k, v in curves.items()}, **{f"q::{k}": v for k, v in qs.items()})
+    ids = [config_id(c) for c in configs]
+    return (pd.DataFrame([rows[i] for i in ids]).assign(id=ids),
+            {i: curves[i] for i in ids}, {i: qs[i] for i in ids})
 
 
 def plot_episode(prices, balances, positions, label="Agente"):

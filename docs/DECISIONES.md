@@ -91,19 +91,61 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   test, en el mercado 1 la media de buy & hold es +19 925 % y la mediana +3 262 %.
 - **Estado:** CERRADA
 
+### D-0.4 · Validación separada del test para ajustar hiperparámetros
+
+- **Fecha:** 2026-10-26
+- **Decisión:** los hiperparámetros se eligen con `N_VAL = 100` series de **validación** (semillas desde `50_000`;
+  `evaluate(..., split="val")`). Las 200 de test (D-0.1) solo se usan una vez, para el resultado final. Con la
+  semilla de entrenamiento `s`, las series de entrenamiento son `s * 10_000 + episodio`, de modo que nunca se
+  cruzan con las de validación (`run_config` lo comprueba).
+- **Justificación:** elegir mirando el test daría un resultado optimista. En el 01 la validación sale algo por
+  encima del test (reversión: +34 % frente a +27 %), lo esperable al quedarse con el máximo de muchas
+  configuraciones.
+- **Implementación:** `run_grid(configs, nombre)` en `src/experiment.py` entrena en paralelo y guarda una caché en
+  `results/<nombre>.csv` (versionado) y `results/cache/` (curvas y tablas Q, no versionado).
+- **Estado:** CERRADA
+
 ### D-2.2 · La tasa de aprendizaje α debe ser pequeña
 
 - **Fecha:** 2026-10-26
-- **Evidencia (00 §7.1, Q-Learning con 10 bins por cuantiles, γ = 0,9, 500 episodios):** con
-  α = 0,1 el agente **no opera nunca** en los mercados 2–4. Con α = 0,01 y α = 0,001 aprende en
-  reversión a la media: +18,3 % y +13,6 % respectivamente, con una política de comprar tras caídas y
-  vender en subidas. La explicación es que, con α constante, Q es una media exponencial cuyo ruido
-  es ≈ σ√(α/2): 0,45 % con σ = 2 % y α = 0,1, frente a una ventaja real de ≈ 0,1 % por paso.
-- **Implicación para 01/02:** barrer α entre 10⁻³ y 10⁻² (o con decaimiento) antes que el resto de
-  hiperparámetros. Además, en el mercado de regímenes ningún α encuentra el seguimiento de
-  tendencia esperado: el agente se queda siempre fuera (0 %, frente a −12,5 % de buy & hold). Ese es
-  el reto principal.
-- **Estado:** ABIERTA (guía para el ajuste del 01/02)
+- **Evidencia del 00 (§7.1):** con α = 0,1 el agente no opera en los mercados 2–4. El ruido de Q es
+  ≈ σ√(α/2) ≈ 0,45 %, frente a una ventaja de ≈ 0,1 % por paso.
+- **Evidencia del 01 (§3, 3 semillas, validación):** α = 0,001 es el elegido en los cuatro mercados. Entre 0,0005 y
+  0,01 los resultados forman una meseta casi plana; con 0,03 empeora y con 0,1 se hunde (mercado 1: x14 frente a
+  x527; reversión: no opera).
+- **Decisión:** α = 0,001 para Q-Learning. Para SARSA (02) se barre el mismo rango.
+- **Estado:** CERRADA para Q-Learning (01)
+
+### D-2.3 · Ajuste de hiperparámetros por mercado, por etapas y con parsimonia
+
+- **Fecha:** 2026-10-26
+- **Decisión:**
+  - Se ajusta **por mercado y por etapas**: α → γ → ε (decaimiento / mínimo) → episodios.
+  - Cada configuración se entrena con **3 semillas** y se puntúa con la mediana entre semillas de la mediana en
+    validación.
+  - **Regla de parsimonia:** un valor nuevo solo sustituye al de partida si le gana en la mayoría de las semillas
+    (comparación semilla a semilla) y tiene mejor mediana.
+  - El resultado final se mide con **5 semillas** en test.
+- **Justificación:** los mercados son muy distintos, y la regla de parsimonia evita elegir por ruido. En la
+  prueba rápida, sin la regla, el browniano habría elegido α = 0,01 por un +3,4 % que salía de 1 sola
+  operación.
+- **Resultado del 01 (Q-Learning):**
+  - Hiperparámetros: mercado 1 → α 0,001, γ 0, ε 0,98 / 0,05, 500 episodios; mercado 3 → α 0,001, γ 0,5,
+    ε 0,99 / 0,01, 500 episodios; mercados 2 y 4 → valores de partida (no opera con ninguna combinación).
+  - Test: x502 · 0 % · +27,0 % · 0 % (buy & hold: x33,6 · −3,5 % · −0,3 % · −12,5 %).
+- **Estado:** CERRADA para el 01. El 02 debe usar el mismo procedimiento.
+
+### D-2.4 · Mercado 4: no operar es lo óptimo con este estado
+
+- **Fecha:** 2026-10-26
+- **Evidencia (01 §9):** se probaron 70 reglas fijas sobre el estado. Las 35 de tendencia ("entrar si bin ≥ e,
+  salir si bin ≤ x") tienen su mejor resultado en −8,6 %; las 35 de reversión ("entrar si bin ≤ e, salir si bin ≥ x"),
+  en −9,2 %. Las mejores baten a buy & hold en las mismas series de validación (−19,4 %), pero ninguna se acerca al
+  0 % de no operar. Es una prueba fuerte, aunque no una demostración, de que no hay ventaja simple con este estado.
+- **Conclusión:** Q-Learning no falla. La tendencia de 6 precios no identifica el régimen (llega tarde y el
+  régimen bajista tiene una volatilidad 2,5 veces mayor).
+- **Implicación:** en el 03 se probará un estado ampliado (tendencia más larga o volatilidad).
+- **Estado:** CERRADA (análisis). El estado ampliado queda ABIERTO para el 03.
 
 ### D-2.1 · Orden de actualización y estado terminal
 
