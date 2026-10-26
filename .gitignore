@@ -218,3 +218,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------
+# Proyecto rl-trading-agents
+# ---------------------------------------------------------------
+# Material bruto de clase (privado, no se versiona)
+docs/raw/
+
+# Tablas Q y objetos serializados (se regeneran con semilla)
+*.npy
+*.npz
+*.pkl
+
+.DS_Store
