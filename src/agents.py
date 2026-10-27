@@ -92,5 +92,7 @@ class SarsaAgent(TabularAgent):
     on_policy = True
 
     def update(self, s, a, r, s2, a2, done):
-        # TODO (02_sarsa)
-        raise NotImplementedError
+        # Q(S,A) <- Q(S,A) + alpha [R + gamma Q(S',A') - Q(S,A)]  (slides3 p29-p31); Q(terminal) = 0.
+        # A' es la acción que el agente ya ha elegido (y va a ejecutar) en S': on-policy.
+        target = r if done else r + self.gamma * self.Q[s2, a2]
+        self.Q[s, a] += self.alpha * (target - self.Q[s, a])

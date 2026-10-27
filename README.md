@@ -99,20 +99,24 @@ jupyter lab notebooks/
 
 ## Resultados hasta ahora
 
-Mediana del retorno en las **200 series de test** (`results/00_baselines.csv`, `results/01_qlearning.csv`). Para
-Q-Learning es la mediana de 5 semillas, con hiperparámetros ajustados en validación (D-0.4, D-2.3).
+Mediana del retorno en las **200 series de test** (`results/00_baselines.csv`, `results/01_qlearning.csv`,
+`results/02_sarsa.csv`). Para los agentes es la mediana de 5 semillas, con hiperparámetros ajustados en validación
+(D-0.4, D-2.3).
 
-| Mercado | Aleatorio | Buy & hold | **Q-Learning** | Estrategia aprendida |
-|---|---|---|---|---|
-| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | Sigue la tendencia (entra en bins 7–10, sale en 1–3) |
-| 2 · Browniano | −19,4 % | −3,5 % | **0 %** | No opera (correcto: no hay señal) |
-| 3 · Reversión a la media | −17,2 % | −0,3 % | **+27,0 %** | Compra tras la caída más fuerte y vende tras la subida más fuerte |
-| 4 · Regímenes | −22,0 % | −12,5 % | **0 %** | No opera: es lo óptimo con este estado (D-2.4) |
+| Mercado | Aleatorio | Buy & hold | **Q-Learning** | **SARSA** | Estrategia aprendida (las dos coinciden) |
+|---|---|---|---|---|---|
+| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | **x471** | Sigue la tendencia (entra en bins altos, sale en 1–3) |
+| 2 · Browniano | −19,4 % | −3,5 % | **0 %** | **0 %** | No opera (correcto: no hay señal) |
+| 3 · Reversión a la media | −17,2 % | −0,3 % | **+27,0 %** | **+27,0 %** | Compra tras la caída más fuerte y vende tras la subida más fuerte |
+| 4 · Regímenes | −22,0 % | −12,5 % | **0 %** | **0 %** | No opera: es lo óptimo con este estado (D-2.4) |
 
 Claves:
 - α = 0,001 en todos los mercados; con 0,1 el agente no aprende (D-2.2).
 - γ depende del mercado: 0 en el 1 y 0,5 en el 3 (01 §4).
-- Q-Learning converge en ≈ 100–260 episodios.
+- Q-Learning converge en ≈ 100–260 episodios; SARSA, algo más despacio (≈ 200–360). Con la misma configuración, 189
+  frente a 203 (mercado 1) y 260 frente a 282 (reversión) (D-2.5).
+- SARSA es más conservador mientras explora, pero la diferencia es pequeña porque un error cuesta solo un 0,1 % y ε
+  decae a 0,01; con ε mínimo 0,05 sí opera bastante menos (02 §5).
 - En el mercado 4, ninguna de las 70 reglas simples sobre el estado (tendencia o reversión) bate a no operar, así que el límite está en el estado
   y no en el algoritmo (01 §9).
 
@@ -122,7 +126,7 @@ Claves:
 - [x] Documentación de teoría (`docs/teoria/`)
 - [x] 00 Entorno y baselines (D-0.1, D-1.1 y D-0.3 cerradas)
 - [x] 01 Q-Learning (D-0.4, D-2.2, D-2.3 y D-2.4)
-- [ ] 02 SARSA
+- [x] 02 SARSA (D-2.5)
 - [ ] 03 Extras
 - [ ] 04 Comparativa
 - [ ] Informe PDF

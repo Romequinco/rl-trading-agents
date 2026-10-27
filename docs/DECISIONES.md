@@ -114,7 +114,10 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   0,01 los resultados forman una meseta casi plana; con 0,03 empeora y con 0,1 se hunde (mercado 1: x14 frente a
   x527; reversión: no opera).
 - **Decisión:** α = 0,001 para Q-Learning. Para SARSA (02) se barre el mismo rango.
-- **Estado:** CERRADA para Q-Learning (01)
+- **Evidencia del 02 (§3):** SARSA prefiere α = 0,0005 en los mercados 1 y 3 (reversión: +34 % frente a +22,6 % en
+  validación). Con 0,03 deja de operar en reversión y con 0,1 se hunde en el mercado 1 (x19). Coherente con un objetivo
+  más ruidoso (usa la acción muestreada, no el máximo).
+- **Estado:** CERRADA para Q-Learning (01) y SARSA (02)
 
 ### D-2.3 · Ajuste de hiperparámetros por mercado, por etapas y con parsimonia
 
@@ -134,6 +137,24 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
     ε 0,99 / 0,01, 500 episodios; mercados 2 y 4 → valores de partida (no opera con ninguna combinación).
   - Test: x502 · 0 % · +27,0 % · 0 % (buy & hold: x33,6 · −3,5 % · −0,3 % · −12,5 %).
 - **Estado:** CERRADA para el 01. El 02 debe usar el mismo procedimiento.
+
+### D-2.5 · SARSA: resultado y comparación con Q-Learning
+
+- **Fecha:** 2026-10-26
+- **Decisión:** SARSA se ajusta con el procedimiento de D-2.3 (mismo punto de partida, mismas rejillas, validación, 3
+  semillas, parsimonia). La pregunta "¿qué algoritmo converge antes?" se responde con un **duelo a configuración idéntica**
+  (α 0,001, γ 0,9, ε 0,99/0,01, 1 000 episodios, mismas 3 semillas, `results/02_duelo.csv`), no con la columna
+  `episodios_convergencia` del test final, que mezcla algoritmo e hiperparámetros.
+- **Hiperparámetros:** mercado 1 → α 0,0005, γ 0, ε 0,99 / 0,01, 1 000 episodios; mercado 3 → α 0,0005, γ 0,9,
+  ε 0,99 / 0,01, 500 episodios; mercados 2 y 4 → valores de partida (no opera con ninguna combinación).
+- **Test (02 §7):** x471 · 0 % · +27,0 % · 0 %. Varias semillas reproducen exactamente la política de Q-Learning
+  (x501,3 y +27,0 %): con 20 estados × 3 acciones los dos llegan a la misma tabla de decisiones.
+- **Convergencia (02 §6 y §9):** Q-Learning converge antes (duelo: 189 frente a 203 episodios en el mercado 1, 260
+  frente a 282 en reversión). SARSA tiene algo más de recompensa online y opera menos (56 frente a 66 operaciones en el
+  mercado 1), como predice *cliff walking*, pero la diferencia es pequeña porque un error de exploración solo cuesta un
+  0,1 % y ε decae a 0,01. Con ε mínimo 0,05, SARSA opera un tercio menos en reversión (22 frente a 32) y una semilla cae
+  a +2,8 %; Q-Learning apenas cambia.
+- **Estado:** CERRADA
 
 ### D-2.4 · Mercado 4: no operar es lo óptimo con este estado
 
