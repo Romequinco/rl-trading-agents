@@ -107,3 +107,33 @@ def make_prices(market, n_steps, seed):
     """Serie de precios reproducible del mercado `market` con la semilla `seed`."""
     np.random.seed(seed)
     return MARKETS[market](n_steps=n_steps)
+
+
+# Extras del notebook 03. Los cuatro generadores del taller permanecen intactos.
+def generar_precios_tendencia_persistente(n_steps=1000, start_price=100.0):
+    """Tendencias largas observables con ruido; cambio de signo con p=0.01."""
+    returns = np.empty(n_steps)
+    direction = 1
+    for t in range(n_steps):
+        if np.random.random() < 0.01:
+            direction *= -1
+        returns[t] = direction * 0.004 + np.random.normal(0, 0.008)
+    return start_price * np.exp(np.cumsum(returns))
+
+
+def generar_precios_saltos(n_steps=1000, start_price=100.0):
+    """Difusión con saltos independientes: prueba de estrés sin señal predictiva."""
+    log_returns = np.random.normal(0.0002 - 0.5 * 0.012**2, 0.012, n_steps)
+    jumps = np.random.random(n_steps) < 0.015
+    log_returns += jumps * np.random.normal(-0.04, 0.06, n_steps)
+    return start_price * np.exp(np.cumsum(log_returns))
+
+
+EXTRA_MARKETS = {
+    "tendencia_persistente": generar_precios_tendencia_persistente,
+    "saltos": generar_precios_saltos,
+}
+# Registro explícito para que importar este módulo no amplíe los barridos de 00–02.
+# El notebook 03 y sus procesos llaman a register_extra_markets().
+def register_extra_markets():
+    MARKETS.update(EXTRA_MARKETS)

@@ -53,6 +53,21 @@ reversión a la media y regímenes alcista/bajista), comparados con un agente al
 
 ## Cómo trabajar
 
+En Windows (PowerShell), desde la carpeta del proyecto:
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m ipykernel install --user --name rl-trading-agents --display-name "Python (RL Trading)"
+.\.venv\Scripts\python.exe -m jupyterlab notebooks/
+```
+
+Si el entorno ya está creado, solo hace falta ejecutar el último comando. No es necesario
+activarlo ni cambiar la política de ejecución de PowerShell. En el cuaderno, selecciona el
+kernel **Python (RL Trading)**; en VS Code también puedes seleccionar `.venv\Scripts\python.exe`.
+
+En otros sistemas:
+
 ```bash
 pip install -r requirements.txt
 jupyter lab notebooks/
@@ -127,6 +142,28 @@ Claves:
 - [x] 00 Entorno y baselines (D-0.1, D-1.1 y D-0.3 cerradas)
 - [x] 01 Q-Learning (D-0.4, D-2.2, D-2.3 y D-2.4)
 - [x] 02 SARSA (D-2.5)
-- [ ] 03 Extras
+- [x] 03 Extras (estado enriquecido, mercados extra y serie real)
 - [ ] 04 Comparativa
 - [ ] Informe PDF
+
+## Extras del notebook 03
+
+`notebooks/03_extras.ipynb` compara el estado base (20 celdas) y uno enriquecido con
+distancia a MA30 y volatilidad20 (180), tanto con Q-Learning como con SARSA. Incluye
+los mercados de reversión y regímenes, dos generadores extra (tendencia persistente y
+difusión con saltos) y una serie real del S&P 500 de FRED, con cortes cronológicos
+2017–2021 / 2022–2023 / 2024–2025. Los datos se guardan localmente con su procedencia
+y huella en `data/`; ejecutar el cuaderno no requiere descargar precios.
+
+La ejecución completa usa cinco semillas, 800 episodios y 200 historias sintéticas de
+test; la real es una sola historia de test por política. Guarda `results/03_extras.csv`
+con el esquema común, además de resultados por semilla/episodio, diferencias emparejadas,
+cobertura, bloques reales, conclusiones y figuras. Las tablas Q se cachean con una huella
+de la configuración, código y datos. `NB_QUICK=1` ejecuta la comprobación corta con
+salidas `_quick`; no sustituye los resultados completos.
+
+El código del 03 vive en `src/extras.py`. La contabilidad del entorno y los algoritmos
+originales se conservan. Los extras solo amplían el registro de mercados cuando se
+importa ese módulo, para no alterar los barridos de 00–02. Decisiones: D-1.2, D-1.3 y D-0.5.
+
+Pruebas desde la raíz: `.\.venv\Scripts\python.exe -m unittest discover -s tests -v`.

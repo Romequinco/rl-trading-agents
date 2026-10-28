@@ -186,3 +186,62 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   exporta a PDF de 2 páginas como máximo.
 - **Pendiente:** herramienta de exportación y plantilla.
 - **Estado:** ABIERTA
+
+### D-1.2 · Extras: estado causal ampliado con comparación controlada
+
+- **Fecha:** 2026-10-28
+- **Decisión:** en el 03 se compara el estado base de 20 celdas con tendencia MA6 (10 bins),
+  desviación respecto a MA30 (3), volatilidad de 20 retornos (3) y posición (2): 180 celdas.
+  Los bordes se estiman únicamente en train y quedan congelados. Se eliminan bordes repetidos
+  si una variable es constante. Las ventanas usan solo precios observados hasta el instante t.
+- **Implementación:** `src/extras.py`. `FeatureTradingEnv` hereda la ejecución, recompensa,
+  comisión y balance de `SimpleTradingEnv`; solo amplía la observación. Q-Learning y SARSA
+  reutilizan sus clases originales con una tabla del tamaño adecuado. El corredor ampliado
+  conserva el orden on/off-policy y se contrasta con `run_episode` para el estado base.
+- **Diseño:** ambos estados usan α=0,001, γ=0,9, ε=1→0,01 con decaimiento 0,99,
+  800 episodios y cinco semillas. Es una ablación con presupuesto fijo; no se compara contra
+  las configuraciones optimizadas de 01–02 ni se afirma que este presupuesto sea óptimo.
+  Validación se informa por separado y no selecciona variantes después de mirar el test.
+- **Ámbito sintético:** reversión, regímenes y los dos mercados extra; 500 precios, 100 series
+  de validación y 200 de test con los offsets de D-0.1/D-0.4.
+- **Evidencia:** `03_extras.ipynb`, `results/03_estado_deltas.csv`, `03_cobertura.csv` y
+  `03_conclusiones.md`. Los deltas emparejan historias y el IC bootstrap condiciona a las
+  políticas entrenadas, sin corregir comparaciones múltiples. La mayor dimensión puede
+  empeorar la estimación aunque aporte información útil.
+- **Estado:** CERRADA (implementación y protocolo; resultados reproducibles en el 03).
+
+### D-1.3 · Dos mercados extra sin modificar los generadores originales
+
+- **Fecha:** 2026-10-28
+- **Decisión:** añadir al final de `src/markets.py` (a) tendencia persistente con cambio de
+  signo p=0,01 y log-retornos N(±0,004, 0,008), y (b) difusión σ=0,012 con saltos
+  independientes p=0,015, N(−0,04, 0,06).
+- **Justificación:** el primero ofrece señal histórica persistente; el segundo comprueba qué
+  hace el agente ante riesgo impredecible. Se añade no operar a los controles para no confundir
+  permanecer en efectivo con anticipar caídas.
+- **Compatibilidad:** `EXTRA_MARKETS` se registra explícitamente desde `src/extras.py`; importar
+  `src.markets` desde 00–02 mantiene sus cuatro mercados. Los cuatro generadores del taller,
+  `make_prices`, el entorno y los agentes comunes permanecen intactos.
+- **Estado:** CERRADA.
+
+### D-0.5 · Serie real con cortes cronológicos y procedencia local
+
+- **Fecha:** 2026-10-28
+- **Decisión:** SP500 de FRED / S&P Dow Jones Indices, 2 262 cierres entre 2017-01-03 y
+  2025-12-31. Se guarda CSV, URL, fecha de descarga y SHA-256 en `data/`.
+- **Partición:** train 2017–2021 (1 259 cierres), validación 2022–2023 (501) y test 2024–2025
+  (502). Los cuantiles y las ventanas de entrenamiento de 252 cierres solo usan train.
+  Las ventanas pueden solaparse y se conserva el orden de sus días. No se baraja la serie.
+- **Evaluación:** una única trayectoria completa de test por entrenamiento, Q congelada;
+  cinco semillas no son cinco historias independientes. Se informa el rango entre semillas.
+  `std` entre historias queda vacío porque no puede estimarse con una trayectoria. Bloques
+  contiguos de hasta 63 retornos, con capital reiniciado, son un diagnóstico temporal adicional
+  y no reemplazan el resultado continuo ni proporcionan historias independientes.
+- **Contexto pasado:** los cinco cierres previos al corte permiten iniciar el entorno en el
+  primer cierre del split; MA30/volatilidad también pueden usar historia anterior conocida.
+  No se recalibran bins con validación o test.
+- **Límites:** índice de precios sin dividendos y no directamente negociable; simulación del
+  taller sin spread, deslizamiento ni intereses del efectivo. No se interpreta como validación
+  operativa ni recomendación de inversión.
+- **Fuente:** https://fred.stlouisfed.org/series/SP500; descarga fijada el 2026-10-28.
+- **Estado:** CERRADA.
