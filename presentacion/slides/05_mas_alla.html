@@ -1,0 +1,14 @@
+<section class="slide">
+  <div class="kicker">Más allá de los mínimos · configuración fija de 800 episodios</div>
+  <h1>Lo que decide es la información del estado, no el algoritmo</h1>
+  <p class="lead">Añadir MA30 y volatilidad (180 celdas) mejora donde el precio tiene memoria, con IC95 por encima de cero.</p>
+  <div class="body" style="flex-direction: column; gap: 2mm;">
+    <div style="flex: 1; min-height: 0;"><img class="fig" style="height: 100%;" src="../results/figures/informe_fig4.png" alt="Delta del estado enriquecido y walk-forward del S&amp;P 500"></div>
+    <div style="display: flex; gap: 8mm; align-items: flex-start;">
+      <div style="flex: 1;"><div class="big" style="font-size:24pt">+23,1 pp</div><div class="bigl">reversión a la media, mediana emparejada; casi todo lo aporta la MA30</div></div>
+      <div style="flex: 1;"><div class="big" style="font-size:24pt">+8,5 %</div><div class="bigl">regímenes con solo la volatilidad (estado base: 0 %)</div></div>
+      <div style="flex: 1.1;"><div class="big" style="font-size:24pt">+45,9 % <span style="font-size:15pt;color:#555">frente a +44,2 %</span></div><div class="bigl">S&amp;P 500, test 2024–2025: el estado base solo iguala a buy &amp; hold y el enriquecido baja a +28,3 %</div></div>
+    </div>
+  </div>
+  <p class="note" style="margin: 0 0 3mm;">Robustez (anexo C): los placebos no dan ventajas falsas; ×4 episodios, Expected SARSA, Double Q o recompensa log apenas cambian nada. La comisión sí pesa.</p>
+</section>

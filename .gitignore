@@ -238,3 +238,7 @@ results/cache/
 # Intermedios del informe (se regeneran con build_informe.py)
 results/informe.html
 results/informe_p*.png
+# Intermedios de la presentación
+presentacion/presentacion.html
+presentacion/preview_*
+presentacion/png/

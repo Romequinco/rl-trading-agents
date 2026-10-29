@@ -1,0 +1,32 @@
+<section class="slide">
+  <style>
+    .s04 table { font-size: 11pt; }
+    .s04 th, .s04 td { padding: 0.9mm 1.4mm; white-space: nowrap; }
+    .s04 thead th { font-size: 10pt; color: #333; line-height: 1.15; vertical-align: bottom; }
+    .s04 .ql { color: #2B6CB0; font-weight: bold; }
+    .s04 .sa { color: #2F9E6E; font-weight: bold; }
+    .s04 td.cv { color: #333; }
+  </style>
+  <div class="kicker">Q-Learning frente a SARSA · off-policy y on-policy</div>
+  <h1>Misma política final; Q-Learning solo converge antes en reversión</h1>
+  <p class="lead">Q(S,A) ← Q(S,A) + α [R + γ máx<sub>a</sub> Q(S′,a) − Q(S,A)]<span class="note">&nbsp;&nbsp;·&nbsp;&nbsp;α 0,001 · γ 0 en el 1, 0,5 en reversión · ε 0,98&nbsp;/&nbsp;0,05 en el 1</span></p>
+  <div class="body s04" style="gap:7mm">
+    <div class="col" style="flex:0.85">
+      <img class="fig" src="figs/04_duelo_convergencia.png" alt="Episodios hasta converger en el duelo">
+      <p class="cap">Duelo con la misma configuración (α 0,001, γ 0,9, 1&nbsp;000 episodios) y las mismas 3 semillas. Converge: la media móvil de 50 episodios alcanza el 90&nbsp;% de su mejora. Reversión: Q&#8209;Learning gana en las 3 semillas; mercado 1: en 1 de 3, empate.</p>
+    </div>
+    <div class="col" style="flex:1.15">
+      <table>
+        <thead><tr><th>Test (mediana)</th><th>Aleatorio</th><th>B&amp;H</th><th class="ql">Q&#8209;L</th><th class="sa">SARSA</th><th>Converg. (ep.)</th></tr></thead>
+        <tbody>
+          <tr><td>1 · Tendencia</td><td>x4,3</td><td>x33,6</td><td class="ql">x502</td><td class="sa">x472</td><td class="cv">189 / 203</td></tr>
+          <tr><td>2 · Browniano</td><td>−19,4&nbsp;%</td><td>−3,5&nbsp;%</td><td class="ql">0&nbsp;%</td><td class="sa">0&nbsp;%</td><td class="cv">—</td></tr>
+          <tr><td>3 · Reversión</td><td>−17,2&nbsp;%</td><td>−0,3&nbsp;%</td><td class="ql">+27,0&nbsp;%</td><td class="sa">+27,0&nbsp;%</td><td class="cv">260 / 282</td></tr>
+          <tr><td>4 · Regímenes</td><td>−22,0&nbsp;%</td><td>−12,5&nbsp;%</td><td class="ql">0&nbsp;%</td><td class="sa">0&nbsp;%</td><td class="cv">—</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:1.5mm">Test: 200 series, mediana de 5 semillas, hiperparámetros propios de cada algoritmo. Convergencia: episodios en el duelo, Q&#8209;L / SARSA. En 2 y 4 no operar es lo correcto con este estado: en regímenes, la mejor de 70 reglas fijas da −8,6&nbsp;% en validación.</p>
+      <div class="verdict" style="font-size:12pt; margin-top:2mm">Con 20 estados y ε final de 0,01 a 0,05, Q(S′,A′) ≈ máx Q(S′,a): las 10 semillas del mercado 1 caen en tres políticas, y x502 frente a x472 refleja cuántas caen en cada una.</div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,36 @@
+<section class="slide annex">
+<style>
+.p9t { font-size: 9.5pt; border: none; table-layout: fixed; }
+.p9t th { font-weight: normal; color: #555; text-align: center; padding: 0.4mm 0; }
+.p9t td { padding: 0; }
+.p9t td.p9 { text-align: center; border: 0.6mm solid #fff; height: 5.5mm; font-weight: bold; line-height: 1.05; }
+.p9t td.p9 span { display: block; font-weight: normal; font-size: 8pt; }
+.p9entrar { background: #2E9E6E; color: #fff; }
+.p9salir { background: #D73232; color: #fff; }
+.p9fuera { background: #ECEFF2; color: #666; }
+.p9dentro { background: #BEE3CF; color: #1d5c3f; }
+.p9t td.p9a { font-weight: bold; color: #102a43; width: 27mm; text-align: left; }
+.p9t td.p9p { color: #444; width: 22mm; text-align: right; padding-right: 2mm; }
+.p9t tr.p9m td { font-weight: bold; color: #2B6CB0; padding: 1mm 0 0.2mm; text-align: left; }
+.p9t tr.p9top td.p9 { border-top-width: 1.2mm; }
+</style>
+<div class="kicker">Anexo B · Políticas aprendidas</div>
+<h1>Q&#8209;Learning y SARSA aprenden casi la misma tabla de decisiones</h1>
+<p class="lead" style="font-size:11.5pt">Acción <i>greedy</i> por bin de tendencia y posición que elige la mayoría de las 5 semillas; acuerdo indicado si no es del 100&nbsp;%.</p>
+<table class="p9t">
+<thead><tr><th></th><th></th><th>1 ↓↓</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10 ↑↑</th></tr></thead>
+<tbody>
+<tr class="p9m"><td colspan="12">1 · Tendencia con ciclo</td></tr>
+<tr class=p9top><td class="p9a">Q&#8209;Learning</td><td class="p9p">sin activo</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera<span>80&nbsp;%</span></td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td></tr>
+<tr><td class="p9a"></td><td class="p9p">con activo</td><td class="p9 p9salir">salir</td><td class="p9 p9salir">salir</td><td class="p9 p9salir">salir<span>60&nbsp;%</span></td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td></tr>
+<tr class=p9top><td class="p9a">SARSA</td><td class="p9p">sin activo</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9entrar">entrar<span>60&nbsp;%</span></td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td><td class="p9 p9entrar">entrar</td></tr>
+<tr><td class="p9a"></td><td class="p9p">con activo</td><td class="p9 p9salir">salir</td><td class="p9 p9salir">salir</td><td class="p9 p9salir">salir<span>60&nbsp;%</span></td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td></tr>
+<tr class="p9m"><td colspan="12">3 · Reversión a la media</td></tr>
+<tr class=p9top><td class="p9a">Q&#8209;Learning</td><td class="p9p">sin activo</td><td class="p9 p9entrar">entrar</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td></tr>
+<tr><td class="p9a"></td><td class="p9p">con activo</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro<span>80&nbsp;%</span></td><td class="p9 p9salir">salir</td></tr>
+<tr class=p9top><td class="p9a">SARSA</td><td class="p9p">sin activo</td><td class="p9 p9entrar">entrar</td><td class="p9 p9fuera">fuera<span>80&nbsp;%</span></td><td class="p9 p9fuera">fuera<span>80&nbsp;%</span></td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td><td class="p9 p9fuera">fuera</td></tr>
+<tr><td class="p9a"></td><td class="p9p">con activo</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9dentro">dentro</td><td class="p9 p9salir">salir</td></tr>
+</tbody></table>
+<p class="cap" style="margin-top:2mm">En los mercados 2 (browniano) y 4 (regímenes) los dos algoritmos eligen «fuera» sin activo en los 10 bins (100&nbsp;% de las semillas): no entran nunca, así que la fila con activo no llega a usarse. Fuente: results/figures/01_politica_final.png y 02_politica_final.png.</p>
+<div class="verdict" style="font-size:11pt; margin-top:1mm; margin-bottom:4mm; padding:1mm 3mm">La única diferencia sistemática está en M1: SARSA ya entra en el bin 6 (3 de 5 semillas). En M3 los dos compran solo tras la caída más fuerte y venden tras la subida más fuerte.</div>
+</section>

@@ -1,0 +1,37 @@
+<section class="slide annex">
+<style>
+.a9t { font-size: 9.5pt; }
+.a9t th, .a9t td { padding: 0.5mm 0.6mm; text-align: center; }
+.a9t th:first-child, .a9t td:first-child { text-align: left; white-space: nowrap; padding-right: 2mm; }
+.a9t thead tr:first-child th { font-weight: bold; color: #102a43; }
+.a9t .a9g { border-left: 0.6pt solid #999; }
+.a9t td.a9s { background: #dbe8f6; font-weight: bold; color: #102a43; }
+.a9f { font-size: 10.5pt; }
+.a9f th, .a9f td { padding: 0.45mm 2mm; }
+.a9f { font-size: 10pt; }
+</style>
+<div class="kicker">Anexo A · Ajuste de hiperparámetros</div>
+<h1>Q&#8209;Learning y SARSA acaban con hiperparámetros casi iguales</h1>
+<p class="lead" style="font-size:11pt; margin-bottom:2mm">Orden α → γ → ε → episodios; cada etapa parte de lo ya fijado. Punto de partida: α&nbsp;=&nbsp;0,001, γ&nbsp;=&nbsp;0,9, ε 0,99&nbsp;/&nbsp;0,01, 500 episodios.</p>
+<table class="a9t"><thead><tr><th></th><th colspan="6" class="a9g">α</th><th colspan="4" class="a9g">γ</th><th colspan="6" class="a9g">ε (decaimiento / mínimo)</th><th colspan="4" class="a9g">episodios</th></tr><tr><th></th><th class="a9g">0,0005</th><th class="">0,001</th><th class="">0,003</th><th class="">0,01</th><th class="">0,03</th><th class="">0,1</th><th class="a9g">0</th><th class="">0,5</th><th class="">0,9</th><th class="">0,99</th><th class="a9g">0,98<br>0,01</th><th class="">0,98<br>0,05</th><th class="">0,99<br>0,01</th><th class="">0,99<br>0,05</th><th class="">0,995<br>0,01</th><th class="">0,995<br>0,05</th><th class="a9g">250</th><th class="">500</th><th class="">1&nbsp;000</th><th class="">2&nbsp;000</th></tr></thead><tbody><tr><td>Q&#8209;L · M1</td><td class="a9g">x527</td><td class="a9s">x527</td><td class="">x518</td><td class="">x527</td><td class="">x296</td><td class="">x14</td><td class="a9s a9g">x596</td><td class="">x527</td><td class="">x527</td><td class="">x527</td><td class="a9g">x718</td><td class="a9s">x817</td><td class="">x596</td><td class="">x668</td><td class="">x596</td><td class="">x596</td><td class="a9g">x718</td><td class="a9s">x817</td><td class="">x817</td><td class="">x817</td></tr><tr><td>SARSA · M1</td><td class="a9s a9g">x527</td><td class="">x504</td><td class="">x504</td><td class="">x527</td><td class="">x489</td><td class="">x19</td><td class="a9s a9g">x668</td><td class="">x527</td><td class="">x527</td><td class="">x527</td><td class="a9g">x668</td><td class="">x596</td><td class="a9s">x668</td><td class="">x596</td><td class="">x668</td><td class="">x668</td><td class="a9g">x596</td><td class="">x668</td><td class="a9s">x817</td><td class="">x743</td></tr><tr><td>Q&#8209;L · M3</td><td class="a9g">+22,2</td><td class="a9s">+22,2</td><td class="">+22,2</td><td class="">+20,1</td><td class="">0</td><td class="">0</td><td class="a9g">0</td><td class="a9s">+34,0</td><td class="">+22,2</td><td class="">+22,2</td><td class="a9g">+34,0</td><td class="">+34,0</td><td class="a9s">+34,0</td><td class="">+34,0</td><td class="">+27,1</td><td class="">+27,1</td><td class="a9g">+34,0</td><td class="a9s">+34,0</td><td class="">+30,6</td><td class="">+30,6</td></tr><tr><td>SARSA · M3</td><td class="a9s a9g">+34,0</td><td class="">+22,6</td><td class="">+23,5</td><td class="">+17,8</td><td class="">0</td><td class="">0</td><td class="a9g">0</td><td class="">+34,0</td><td class="a9s">+34,0</td><td class="">+34,0</td><td class="a9g">+34,0</td><td class="">+22,2</td><td class="a9s">+34,0</td><td class="">+22,1</td><td class="">+20,6</td><td class="">+20,6</td><td class="a9g">+23,8</td><td class="a9s">+34,0</td><td class="">+34,0</td><td class="">+34,0</td></tr></tbody></table>
+<p class="cap">Retorno en validación: mediana entre 3 semillas de la mediana en 100 series de validación. M1 (tendencia con ciclo) en múltiplo del capital; M3 (reversión a la media) en %. En azul, el valor que queda fijado. En los mercados 2 y 4 casi todas las celdas dan 0&nbsp;% (no opera) y se mantiene el punto de partida.</p>
+<div class="body" style="margin-top:2mm; gap:8mm; padding-bottom:3mm">
+<div class="col">
+<table class="a9f">
+<thead><tr><th>Configuración final</th><th>α</th><th>γ</th><th>ε</th><th>Episodios</th><th>Test</th></tr></thead>
+<tbody>
+<tr><td>Q&#8209;Learning · M1</td><td>0,001</td><td>0</td><td>0,98 / 0,05</td><td>500</td><td>x502</td></tr>
+<tr><td>SARSA · M1</td><td>0,0005</td><td>0</td><td>0,99 / 0,01</td><td>1&nbsp;000</td><td>x472</td></tr>
+<tr><td>Q&#8209;Learning · M3</td><td>0,001</td><td>0,5</td><td>0,99 / 0,01</td><td>500</td><td>+27,0&nbsp;%</td></tr>
+<tr><td>SARSA · M3</td><td>0,0005</td><td>0,9</td><td>0,99 / 0,01</td><td>500</td><td>+27,0&nbsp;%</td></tr>
+<tr><td>Ambos · M2 y M4</td><td>0,001</td><td>0,9</td><td>0,99 / 0,01</td><td>500</td><td>0&nbsp;%</td></tr>
+</tbody></table>
+<p class="cap">Test: mediana de 5 semillas en 200 series (results/04_algoritmos.csv).</p>
+</div>
+<div class="col narrow" style="font-size:10.5pt">
+<p><b>Regla de parsimonia.</b> Un valor solo sustituye al vigente si gana en la mayoría de las semillas, comparando semilla a semilla, y tiene mejor mediana.</p>
+<p>Por eso Q&#8209;Learning conserva α&nbsp;=&nbsp;0,001 en M1 pese al empate con 0,0005 y 0,01, y 500 episodios pese al empate con 1&nbsp;000 y 2&nbsp;000. Sin la regla, el browniano habría elegido α&nbsp;=&nbsp;0,01 por un +3,4&nbsp;% debido a una sola operación.</p>
+<p>α&nbsp;≥&nbsp;0,03 hunde los resultados: x14 y x19 con α&nbsp;=&nbsp;0,1 en M1.</p>
+</div>
+</div>
+</section>

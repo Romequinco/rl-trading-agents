@@ -1,0 +1,39 @@
+<section class="slide annex">
+<style>
+.r9 { font-size: 10pt; }
+.r9 th, .r9 td { padding: 0.65mm 2mm; }
+.r9 tr.r9s td { border-top: 0.5pt solid #999; }
+.r9 tr.r9ref td { background: #dbe8f6; font-weight: bold; color: #102a43; }
+.r9 td.r9n { color: #777; font-size: 9pt; text-align: left; }
+</style>
+<div class="kicker">Anexo C · Robustez del estado enriquecido</div>
+<h1>Ni los episodios ni el algoritmo mueven el resultado; la comisión sí</h1>
+<div class="body" style="gap:6mm">
+<div class="col wide" style="flex:1.9; justify-content:flex-start">
+<table class="r9">
+<thead><tr><th>Retorno mediano en test (%)</th><th>Reversión</th><th>Regímenes</th><th>Tend. persistente</th><th>S&amp;P 500</th></tr></thead>
+<tbody>
+<tr><td>Estado base (20 celdas)</td><td>+18,1</td><td>0,0</td><td>+104,5</td><td>+45,9</td></tr>
+<tr><td>Base + MA30</td><td><b>+44,0</b></td><td>0,0</td><td><b>+120,6</b></td><td>+37,2</td></tr>
+<tr><td>Base + volatilidad</td><td>+25,5</td><td><b>+8,5</b></td><td>+109,0</td><td>+41,8</td></tr>
+<tr class="r9ref"><td>Enriquecido (ambos): referencia</td><td>+42,8</td><td>+7,8</td><td>+123,8</td><td>+28,3</td></tr>
+<tr class="r9s"><td>×4 episodios (3&nbsp;200)</td><td>+42,8</td><td>+8,2</td><td>+126,0</td><td>+28,7</td></tr>
+<tr><td>Rango de 4 algoritmos TD</td><td>42,3 a 43,9</td><td>6,5 a 7,8</td><td>123,8 a 128,7</td><td>28,3 a 32,5</td></tr>
+<tr><td>Recompensa log(balance)</td><td>+42,8</td><td>+8,1</td><td>+126,5</td><td>+28,7</td></tr>
+<tr class="r9s"><td>Comisión 0&nbsp;%</td><td>+45,8 <span class="note">(61)</span></td><td>+9,6 <span class="note">(44)</span></td><td>+128,0 <span class="note">(30)</span></td><td></td></tr>
+<tr><td>Comisión 0,25&nbsp;%</td><td>+38,3 <span class="note">(16)</span></td><td>0,0 <span class="note">(2)</span></td><td>+123,6 <span class="note">(8)</span></td><td></td></tr>
+<tr><td>Comisión 0,5&nbsp;%</td><td>+23,0 <span class="note">(6)</span></td><td>0,0 <span class="note">(0)</span></td><td>+79,6 <span class="note">(4)</span></td><td></td></tr>
+<tr class="r9s"><td>Buy &amp; hold</td><td>−0,3</td><td>−12,5</td><td>+22,8</td><td>+44,2</td></tr>
+</tbody></table>
+<p class="cap">Q&#8209;Learning, 800 episodios, configuración fija (α&nbsp;0,001, γ&nbsp;0,9, ε 0,99&nbsp;/&nbsp;0,01), mediana de 5 semillas en 200 historias de test (S&amp;P 500: una trayectoria 2024–2025). Un factor cada vez respecto a la referencia; la comisión de referencia es 0,1&nbsp;%. Entre paréntesis, operaciones por historia. Algoritmos: Q&#8209;Learning, SARSA, Expected SARSA y Double Q&#8209;Learning. Fuente: results/03_anexo.csv y 03_anexo_conclusiones.md.</p>
+</div>
+<div class="col" style="font-size:10.5pt; justify-content:flex-start">
+<p><b>Un indicador por mercado.</b> MA30 en reversión y tendencia, volatilidad en regímenes: el que predice el mecanismo del generador.</p>
+<p><b>No falta entrenamiento.</b> Con ×4 episodios el estado de 180 celdas apenas se mueve.</p>
+<p><b>Placebos.</b> Browniano: 0,0&nbsp;% con los dos estados. S&amp;P 500 con retornos barajados: base +44,0&nbsp;% y enriquecido +11,1&nbsp;%, frente a +44,2&nbsp;% de buy &amp; hold. Sin señal, el agente no opera o compra y mantiene.</p>
+<p><b>La comisión sí pesa.</b> Reversión aguanta un 0,5&nbsp;%; en regímenes la ganancia desaparece ya con un 0,25&nbsp;%.</p>
+<p><b>Recompensa log en M1:</b> de x412 a x431.</p>
+<p class="note">Sin corrección por comparaciones múltiples.</p>
+</div>
+</div>
+</section>

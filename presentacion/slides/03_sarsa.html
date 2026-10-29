@@ -1,0 +1,69 @@
+<section class="slide">
+  <style>
+    .s03 { flex-direction: column; justify-content: center; gap: 0; }
+    .s03 .row { display: flex; gap: 6mm; }
+    .s03 .mk { flex: 1; min-width: 0; }
+    .s03 .mkn { font-size: 12pt; color: #102a43; font-weight: bold; margin-bottom: 2.5mm; font-size: 13pt; }
+    .s03 .big { font-size: 32pt; }
+    .s03 table.pm { border: 0; border-collapse: separate; border-spacing: 0.7mm; font-size: 10pt; width: 100%; table-layout: fixed; }
+    .s03 table.pm th { width: 17mm; font-weight: normal; color: #555; text-align: left; padding: 0 1mm 0 0; white-space: nowrap; }
+    .s03 table.pm td { height: 11mm; padding: 0; }
+    .s03 table.pm tr.ax td { height: auto; text-align: center; color: #555; font-size: 10pt; }
+    .s03 .pol { font-size: 13pt; margin-top: 2.5mm; color: #222; }
+    .s03 .leg { font-size: 10.5pt; color: #555; margin-top: 6mm; }
+    .s03 .leg i { display: inline-block; width: 4mm; height: 3.2mm; vertical-align: -0.4mm; margin: 0 1.2mm 0 4mm; }
+    .s03 .leg i:first-child { margin-left: 0; }
+  </style>
+  <div class="kicker">SARSA · on-policy</div>
+  <h1>SARSA aprende la estrategia esperada en los cuatro mercados</h1>
+  <p class="lead">Q(S,A) ← Q(S,A) + α [R + γ Q(S′,A′) − Q(S,A)]<span class="note">&nbsp;&nbsp;·&nbsp;&nbsp;α 0,0005 en 1 y 3 · γ 0 en el 1, 0,9 en reversión · 1 000 episodios en el 1</span></p>
+  <div class="body s03">
+    <div class="row">
+    <div class="mk">
+      <div class="mkn">1 · Tendencia + ciclo</div>
+      <div class="big">x472</div>
+      <div class="bigl">buy &amp; hold x33,6<br>aleatorio x4,3</div>
+      <table class="pm">
+        <tr><th>sin activo</th><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#2F9E6E"></td><td style="background:#2F9E6E"></td><td style="background:#2F9E6E"></td><td style="background:#2F9E6E"></td><td style="background:#2F9E6E"></td></tr>
+        <tr><th>con activo</th><td style="background:#d64541"></td><td style="background:#d64541"></td><td style="background:#d64541"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td></tr>
+        <tr class="ax"><th></th><td>1</td><td colspan="8"></td><td>10</td></tr>
+      </table>
+      <div class="pol">sigue la tendencia</div>
+    </div>
+    <div class="mk">
+      <div class="mkn">2 · Browniano</div>
+      <div class="big">0 %</div>
+      <div class="bigl">buy &amp; hold −3,5 %<br>aleatorio −19,4 %</div>
+      <table class="pm">
+        <tr><th>sin activo</th><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td></tr>
+        <tr><th>con activo</th><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td></tr>
+        <tr class="ax"><th></th><td>1</td><td colspan="8"></td><td>10</td></tr>
+      </table>
+      <div class="pol">no opera</div>
+    </div>
+    <div class="mk">
+      <div class="mkn">3 · Reversión a la media</div>
+      <div class="big">+27,0 %</div>
+      <div class="bigl">buy &amp; hold −0,3 %<br>aleatorio −17,2 %</div>
+      <table class="pm">
+        <tr><th>sin activo</th><td style="background:#2F9E6E"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td></tr>
+        <tr><th>con activo</th><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#d64541"></td></tr>
+        <tr class="ax"><th></th><td>1</td><td colspan="8"></td><td>10</td></tr>
+      </table>
+      <div class="pol">compra en bin 1, vende en 10</div>
+    </div>
+    <div class="mk">
+      <div class="mkn">4 · Regímenes</div>
+      <div class="big">0 %</div>
+      <div class="bigl">buy &amp; hold −12,5 %<br>aleatorio −22,0 %</div>
+      <table class="pm">
+        <tr><th>sin activo</th><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td><td style="background:#e9ecef"></td></tr>
+        <tr><th>con activo</th><td style="background:#d64541"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#b7e0c8"></td><td style="background:#d64541"></td></tr>
+        <tr class="ax"><th></th><td>1</td><td colspan="8"></td><td>10</td></tr>
+      </table>
+      <div class="pol">no opera</div>
+    </div>
+    </div>
+    <div class="leg"><i style="background:#2F9E6E"></i>entrar<i style="background:#d64541"></i>salir<i style="background:#b7e0c8"></i>dentro<i style="background:#e9ecef"></i>fuera &nbsp;·&nbsp; bin de tendencia: 1, caída más fuerte; 10, subida más fuerte<br>Retorno: mediana en las 200 series de test (5 semillas). Política: la acción que elige la mayoría de las semillas.</div>
+  </div>
+</section>

@@ -1,0 +1,40 @@
+<section class="slide annex">
+<style>
+.s9 { font-size: 10pt; }
+.s9 th, .s9 td { padding: 0.45mm 1.6mm; }
+.s9 tr.s9b td { background: #dbe8f6; }
+</style>
+<div class="kicker">Anexo D · S&amp;P 500</div>
+<h1>En el S&amp;P 500 ningún estado bate de forma consistente a buy &amp; hold</h1>
+<p class="lead" style="font-size:11pt">Cierres diarios de FRED, 2017–2025 (2&nbsp;262). Cortes fijados antes de entrenar: train 2017–2021 (1&nbsp;259), validación 2022–2023 (501), test 2024–2025 (502). Bins y ventanas de 252 cierres solo con train.</p>
+<div class="body" style="gap:5mm">
+<div class="col wide" style="flex:1.75; justify-content:flex-start">
+<img class="fig" src="figs/9_sp500_balance.png" alt="Balance en test 2024-2025" style="max-height:64mm">
+<p class="cap">Balance en test 2024–2025 con la Q congelada (semilla 0); recorte de 03_real_balance.png. La serie con sus cortes está en 03_serie_real_splits.png.</p>
+<p class="note" style="margin-top:1mm"><b>Límites:</b> índice de precios sin dividendos, sin <i>spread</i> ni deslizamiento; una sola trayectoria de test, así que 5 semillas no son 5 historias independientes.</p>
+</div>
+<div class="col" style="justify-content:flex-start">
+<table class="s9">
+<thead><tr><th>Test 2024–2025</th><th>Retorno</th><th>Caída máx.</th><th>Ops.</th></tr></thead>
+<tbody>
+<tr class="s9b"><td>Buy &amp; hold</td><td>+44,2&nbsp;%</td><td>18,9&nbsp;%</td><td>1</td></tr>
+<tr><td>Q&#8209;L / SARSA base</td><td>+45,9&nbsp;%</td><td>18,9&nbsp;%</td><td>1</td></tr>
+<tr><td>Q&#8209;L enriquecido</td><td>+28,3&nbsp;%</td><td>11,4&nbsp;%</td><td>79</td></tr>
+<tr><td>SARSA enriquecido</td><td>+29,9&nbsp;%</td><td>12,8&nbsp;%</td><td>77</td></tr>
+</tbody></table>
+<table class="s9" style="margin-top:2.5mm">
+<thead><tr><th><i>Walk-forward</i> (Q&#8209;L)</th><th>B&amp;H</th><th>Base</th><th>Enriq.</th></tr></thead>
+<tbody>
+<tr><td>2019</td><td>+28,6</td><td>+16,5</td><td>+6,6</td></tr>
+<tr><td>2020</td><td>+15,2</td><td>+10,4</td><td>+1,0</td></tr>
+<tr><td>2021</td><td>+28,7</td><td>+25,3</td><td>+7,0</td></tr>
+<tr><td>2022</td><td>−20,0</td><td>−18,4</td><td>−20,7</td></tr>
+<tr><td>2023</td><td>+24,6</td><td>+21,3</td><td>+11,0</td></tr>
+<tr><td>2024</td><td>+23,9</td><td>+23,9</td><td>+17,4</td></tr>
+<tr><td>2025</td><td>+16,5</td><td>+14,9</td><td>+15,8</td></tr>
+</tbody></table>
+<p class="cap">Retorno del año (%); se entrena solo con años anteriores. Mediana de 5 semillas (03_extras.csv, 03_anexo.csv).</p>
+
+</div>
+</div>
+</section>
