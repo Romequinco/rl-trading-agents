@@ -4,6 +4,8 @@ Práctica en grupo del Máster MIAX (módulo de Aprendizaje por Refuerzo): Q-Lea
 para invertir en un único activo sobre mercados sintéticos (tendencia + ciclo, browniano geométrico,
 reversión a la media y regímenes alcista/bajista), comparados con un agente aleatorio y con buy & hold.
 
+**Grupo:** Óscar Romero Quincoces, Fernando Dapena Tauste y Daniel García López.
+
 ## Enunciado (resumen)
 
 - **Entorno:** `SimpleTradingEnv` del taller. El estado es `(tendencia, posición)`, las acciones son
@@ -174,7 +176,7 @@ Estas diferencias entre resúmenes no son la mediana de diferencias emparejadas 
 - [x] 02 SARSA (D-2.5)
 - [x] 03 Extras (estado enriquecido, mercados extra y serie real) y anexo de robustez (D-1.4)
 - [x] 04 Comparativa (tabla final, Q-Learning frente a SARSA, extras, figuras del informe y análisis crítico)
-- [x] Informe PDF (`results/informe.pdf`, 2 páginas; se regenera con `python build_informe.py`; falta poner los nombres del grupo)
+- [x] Informe PDF (`results/informe.pdf`, 2 páginas; se regenera con `python build_informe.py`)
 
 ## Extras del notebook 03
 
