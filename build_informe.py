@@ -24,28 +24,33 @@ CHROME_CANDIDATES = [
 ]
 
 CSS = """
-@page { size: A4; margin: 10mm 11mm 9mm; }
+@page { size: A4; margin: 7mm 9.5mm 6.5mm; }
 * { box-sizing: border-box; }
-body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.6pt; line-height: 1.32; color: #1f2328; margin: 0; }
-h1 { font-size: 15pt; margin: 0 0 1mm; color: #102a43; }
-h2 { break-after: avoid; font-size: 10.5pt; margin: 2.6mm 0 1.2mm; padding: 0.8mm 2mm; background: #e8eef5; color: #102a43; border-left: 2.5pt solid #2B6CB0; }
-h3 { font-size: 9pt; margin: 1.8mm 0 0.6mm; color: #102a43; }
-p { margin: 0 0 1.2mm; }
-ul { margin: 0 0 1.2mm; padding-left: 4.2mm; }
-li { margin: 0 0 0.4mm; }
-img { width: 100%; display: block; break-inside: avoid; margin: 0.6mm 0 0.4mm; }
-table { border-collapse: collapse; width: 100%; font-size: 7.4pt; margin: 0.8mm 0 0.6mm; }
-th, td { border-bottom: 0.4pt solid #c9d1d9; padding: 0.5mm 1mm; text-align: right; }
-th:first-child, td:first-child, th:last-child, td:last-child { text-align: left; }
-th { background: #f3f5f8; }
-.sub { color: #57606a; font-size: 8pt; margin-bottom: 1.5mm; }
-.cap { font-size: 7.4pt; color: #57606a; margin: 0 0 1.2mm; }
-.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6mm; margin: 1mm 0 1.4mm; }
-.card { border: 0.5pt solid #c9d1d9; border-radius: 1.5mm; padding: 1.2mm 1.6mm; font-size: 7.6pt; }
-.card b { display: block; color: #102a43; }
-.verdict { background: #e6f4ea; color: #14532d; border-radius: 1.5mm; padding: 1.2mm 2mm; margin: 1mm 0 1.4mm; font-weight: 600; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; }
-.note { background: #fff8e1; border-radius: 1.5mm; padding: 1.2mm 2mm; }
+body { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: 8.7pt; line-height: 1.22; color: #111; margin: 0; orphans: 2; widows: 2; }
+h1 { font-size: 14.5pt; font-weight: bold; margin: 0 0 0.6mm; text-align: center; }
+h2 { break-after: avoid; font-size: 10pt; font-weight: bold; margin: 1.8mm 0 0.7mm; }
+p, li { text-align: justify; hyphens: auto; }
+p { margin: 0 0 1mm; text-indent: 0; }
+ul { margin: 0 0 1mm; padding-left: 4mm; }
+img { width: 100%; display: block; break-inside: avoid; margin: 0 0 0.4mm; }
+table { border-collapse: collapse; width: 100%; font-size: 8.2pt; margin: 0 0 1.4mm; border-top: 0.9pt solid #000; border-bottom: 0.9pt solid #000; }
+thead th { border-bottom: 0.5pt solid #000; font-weight: normal; }
+th, td { padding: 0.5mm 1mm; text-align: right; white-space: nowrap; }
+th { white-space: normal; line-height: 1.12; vertical-align: bottom; }
+th:first-child, td:first-child { text-align: left; }
+.sub { font-size: 8.5pt; margin-bottom: 1.2mm; text-align: center; }
+.cap { font-size: 7.8pt; line-height: 1.2; margin: 0 0 1mm; }
+.cap b { font-weight: bold; }
+.tcap { margin: 0.6mm 0 0.6mm; }
+.side { display: grid; grid-template-columns: 66fr 34fr; gap: 3.5mm; align-items: center; margin: 0.4mm 0 0.6mm; break-inside: avoid; }
+.side2 { grid-template-columns: 67fr 33fr; }
+.side3 { grid-template-columns: 71fr 29fr; }
+.side4 { grid-template-columns: 71fr 29fr; }
+.side2, .side3, .side4 { margin: 2.2mm 0 2.2mm; }
+.side2 p:not(.cap) { margin: 0; }
+.side .cap { margin-bottom: 0.8mm; }
+.pol p { margin: 0 0 0.9mm; font-size: 8.6pt; line-height: 1.22; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
 .pagebreak { break-after: page; }
 """
 

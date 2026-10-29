@@ -3,95 +3,115 @@
 
 # Agentes de RL tabular para trading de un activo
 
-<p class="sub">[Nombres del grupo] · Máster MIAX · Aprendizaje por Refuerzo · Octubre 2026</p>
+<p class="sub">Óscar Romero Quincoces · Fernando · Daniel García · Máster MIAX · Aprendizaje por Refuerzo · Octubre 2026</p>
 
-## 0. Planteamiento y diseño
+## 1. Planteamiento y diseño experimental
 
-Entorno del taller (vender, mantener, comprar; comisión 0,1 %; recompensa = retorno del paso con el activo) en cuatro mercados sintéticos: tendencia + ciclo, browniano, reversión a la media y regímenes.
+Trabajamos con el entorno del taller: tres acciones (vender, mantener y comprar), una comisión del 0,1&nbsp;% por operación y, como recompensa, el retorno del paso mientras se tiene el activo, con 494 decisiones por episodio. Lo evaluamos en los cuatro mercados sintéticos del enunciado (tendencia con ciclo, browniano, reversión a la media y regímenes).
+El estado combina la posición con 10 bins de tendencia definidos por cuantiles, lo que da 20 estados. Los cuantiles se calculan en cada mercado porque con bordes fijos el mercado 1 deja el 89&nbsp;% de los pasos en los bins extremos; con cuantiles, en 800 episodios cada celda se visita unas 19&nbsp;400 veces (D-1.1). Cada episodio usa una serie nueva. Elegimos los hiperparámetros con 100 series de validación y medimos el resultado una sola vez, con la política greedy, sobre otras 200 de test (D-0.1, D-0.4). La validación sale algo optimista (en reversión, +34,0&nbsp;% frente al +27,0&nbsp;% de test). El ajuste sigue el orden α, γ, ε (decaimiento por episodio y mínimo) y número de episodios, con 3 semillas, y solo aceptamos un cambio si mejora en la mayoría de ellas (D-2.3).
 
-- **Estado (D-1.1):** 10 bins de tendencia por cuantiles × posición = 20 estados. Se adaptan a cada mercado; con bordes fijos, el mercado 1 deja el 89 % de pasos en los extremos.
-- **Protocolo (D-0.1, D-0.4):** serie nueva por episodio; 100 de validación eligen hiperparámetros; 200 de test, usadas una vez y con política greedy.
-- **Métrica (D-0.3):** mediana en test (y de 5 semillas), porque en el mercado 1 buy & hold da media x200 con std de 657 veces el capital.
-- **Ajuste (D-2.3):** α → γ → ε → episodios; un cambio solo entra si gana en la mayoría de semillas.
+La métrica principal es la mediana en test (para los agentes, mediana de 5 semillas), porque la media no es representativa: en el mercado 1, buy & hold tiene una media de x200 con una desviación típica de 657 veces el capital. También miramos el Sharpe por paso, la caída máxima y el número de operaciones. Decimos que un agente ha convergido en el primer episodio en que la media móvil de 50 episodios de la recompensa alcanza el 90&nbsp;% de su mejora total (D-0.3).
 
-## 1. ¿Aprende la estrategia esperada?
+## 2. Estrategia aprendida en cada mercado
 
-Sí, en los cuatro mercados, y Q-Learning y SARSA aprenden la misma. Todo se mide en 200 series de test, con hiperparámetros elegidos en validación.
+En los cuatro mercados Q&#8209;Learning y SARSA aprenden la estrategia que cabe esperar del generador de precios, y llegan a la misma (Figura 1 y Tabla 1). A la derecha de la figura resumimos la política greedy por bin de tendencia (el 1 es la caída más fuerte) que elige la mayoría de las 5 semillas.
 
-<div class="cards" markdown="1">
-<div class="card" markdown="1">**1 · Tendencia + ciclo** Esperada: seguir la tendencia → aprendida: la sigue (x502).</div>
-<div class="card" markdown="1">**2 · Browniano** Esperada: no hay señal → aprendida: no opera (0 %).</div>
-<div class="card" markdown="1">**3 · Reversión a la media** Esperada: comprar caídas, vender subidas → aprendida: eso (+27,0 %).</div>
-<div class="card" markdown="1">**4 · Regímenes** Esperada: estado ciego al régimen → aprendida: no opera (0 %).</div>
+<div class="side" markdown="1">
+<div markdown="1">
+
+![Rendimiento en test](figures/informe_fig1.png)
+<p class="cap"><b>Figura 1.</b> Mediana del retorno en las 200 series de test; para los agentes, mediana de 5 semillas (las marcas indican cada semilla). El mercado 1 se expresa en múltiplo del capital y en escala logarítmica.</p>
+
+</div>
+<div class="pol" markdown="1">
+
+*Ten&shy;dencia con ciclo.* El agente sigue la ten&shy;dencia: compra en los bins 7 a 10 (SARSA ya desde el 6), vende en los bins 1 a 3 y mantiene la posición en los inter&shy;me&shy;dios. Termina en x502, frente a x33,6 de buy & hold.
+
+*Brow&shy;niano.* No hay señal que explotar y el agente no entra en ningún bin (0&nbsp;%), que es lo razo&shy;nable.
+
+*Rever&shy;sión a la media.* Conviene comprar tras las caídas y vender tras las subidas, pero el agente solo lo hace en los extremos: compra en el bin 1 y vende en el 10 (+27,0&nbsp;%).
+
+*Regí&shy;menes.* Habría que estar dentro en el régimen alcista y fuera en el bajista, pero con este estado no se dis&shy;tin&shy;guen y el agente no entra nunca (0&nbsp;%).
+
+</div>
 </div>
 
-![Rendimiento en test](figures/04_informe_rendimiento.png){: style="width:76%; margin:0 auto"}
-<p class="cap">Figura 1. Mediana del retorno en las 200 series de test. Agentes con hiperparámetros elegidos en validación; mediana de 5 semillas (marcas: cada semilla). Mercado 1 en múltiplo del capital, escala log.</p>
+<p class="cap tcap"><b>Tabla 1.</b> Mediana del retorno en test (mercado 1 en múltiplo del capital); para los agentes, mediana de 5 semillas. Las operaciones por episodio corresponden a la política greedy en test con los hiperparámetros de cada algoritmo. La convergencia procede del duelo con configuración idéntica y 3 semillas (D-2.5); en los mercados 2 y 4 no se define porque el agente no opera. La caída máxima es la media en test. La última columna usa la configuración fija del anexo (800 episodios, sin ajuste; D-1.2) y no es comparable uno a uno con las demás.</p>
 
-| Mercado | Aleatorio | Buy & hold | **Q-Learning** | **SARSA** | Ops./ep. Q-L · SARSA | Conv. Q-L · SARSA (ep.) | Q-L enriq. (03) | Política aprendida |
-|:--|--:|--:|--:|--:|--:|--:|--:|:--|
-| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | **x472** | 48 · 57 | 189 · 203 | x412 | Sigue la tendencia |
-| 2 · Browniano | −19,4 % | −3,5 % | **0 %** | **0 %** | 0 · 0 | — | 0 % | No opera: no hay señal |
-| 3 · Reversión | −17,2 % | −0,3 % | **+27,0&nbsp;%** | **+27,0&nbsp;%** | 29 · 29 | 260 · 282 | +42,8 % | Compra tras caídas, vende tras subidas |
-| 4 · Regímenes | −22,0 % | −12,5 % | **0 %** | **0 %** | 0 · 0 | — | +7,8 % | No opera: el estado no ve el régimen |
+| Mercado | Aleatorio | Buy & hold | Q&#8209;Learning | SARSA | Operaciones/ep.<br>Q&#8209;L / SARSA | Convergencia (ep.)<br>Q&#8209;L / SARSA | Caída máxima<br>B&H / Q&#8209;L | Q&#8209;L con estado<br>enriquecido |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| 1. Tendencia con ciclo | x4,3 | x33,6 | x502 | x472 | 48 / 57 | 189 / 203 | 90&nbsp;% / 64&nbsp;% | x412 |
+| 2. Browniano | −19,4&nbsp;% | −3,5&nbsp;% | 0&nbsp;% | 0&nbsp;% | 0 / 0 | — | 41&nbsp;% / 0&nbsp;% | 0&nbsp;% |
+| 3. Reversión a la media | −17,2&nbsp;% | −0,3&nbsp;% | +27,0&nbsp;% | +27,0&nbsp;% | 29 / 29 | 260 / 282 | 26&nbsp;% / 20&nbsp;% | +42,8&nbsp;% |
+| 4. Regímenes | −22,0&nbsp;% | −12,5&nbsp;% | 0&nbsp;% | 0&nbsp;% | 0 / 0 | — | 45&nbsp;% / 0&nbsp;% | +7,8&nbsp;% |
 
-<p class="cap">Mediana del retorno en test (mercado 1 en múltiplo del capital); agentes: mediana de 5 semillas. Ops./ep.: política greedy en test, con los hiperparámetros de cada algoritmo. Convergencia: duelo a configuración idéntica, 3 semillas (D-2.5). La columna enriquecido usa la configuración fija del 03 (800 episodios, sin ajuste; D-1.2): no es comparable uno a uno.</p>
+Decimos que es la estrategia esperada porque cada política reproduce el mecanismo que genera los precios. En el mercado 1 el agente multiplica por unas 15 veces el capital final de buy & hold, con un Sharpe por paso mayor (0,19 frente a 0,11) y una caída máxima menor. En reversión supera a buy & hold en 27,3 pp; en media y desviación típica, +28,6&nbsp;% ± 23,2&nbsp;% frente a +0,2&nbsp;% ± 7,1&nbsp;%. En los otros dos mercados no operar también es lo correcto: el browniano no tiene señal y, en regímenes, la mejor de 70 reglas fijas sobre el estado obtiene −8,6&nbsp;% en validación, bastante peor que quedarse fuera (D-2.4). Así, los dos algoritmos quedan por encima de ambos baselines en los cuatro mercados.
 
-**Lectura.** Es la estrategia esperada porque cada política reproduce el mecanismo del generador: en el mercado 1 multiplica por ≈ 15 el capital de buy & hold; en reversión le saca +27,3 pp. No operar es correcto: el browniano no tiene señal y, en regímenes, de 70 reglas fijas sobre el estado la mejor da −8,6 % en validación, lejos del 0 % (D-2.4).
+## 3. Q&#8209;Learning frente a SARSA
 
-<div class="verdict">Sí: los dos algoritmos aprenden la estrategia esperada y baten a los dos baselines en los cuatro mercados.</div>
+Los hiperparámetros elegidos en validación son parecidos. Q&#8209;Learning usa α&nbsp;=&nbsp;0,001 en los cuatro mercados, con γ&nbsp;=&nbsp;0 y ε de 0,98&nbsp;/&nbsp;0,05 (decaimiento&nbsp;/&nbsp;mínimo) en el mercado 1 y γ&nbsp;=&nbsp;0,5 en reversión. SARSA prefiere α&nbsp;=&nbsp;0,0005 y ε de 0,99&nbsp;/&nbsp;0,01 en los mercados 1 y 3, con γ&nbsp;=&nbsp;0 y 1&nbsp;000 episodios en el primero y γ&nbsp;=&nbsp;0,9 en el segundo. En los mercados 2 y 4 dejamos los valores de partida (α&nbsp;=&nbsp;0,001, γ&nbsp;=&nbsp;0,9, ε de 0,99&nbsp;/&nbsp;0,01 y 500 episodios), porque ningún cambio los hace operar. La ventaja por paso, de alrededor del 0,1&nbsp;%, es menor que el ruido que introduce un α grande, y con α&nbsp;=&nbsp;0,1 los agentes se quedan en x14 y x19 en validación. Con un ruido del 10&nbsp;% por paso, el valor del futuro lejano se estima mal y sale ganando el agente miope (γ&nbsp;=&nbsp;0), salvo en reversión, donde el rebote tarda varios pasos en llegar y con γ&nbsp;=&nbsp;0 el agente no opera.
 
-## 2. ¿Q-Learning o SARSA?
+Para comparar la velocidad de aprendizaje enfrentamos los dos algoritmos con la misma configuración y las mismas semillas (Figuras 2 y 3). Q&#8209;Learning converge antes en mediana, en 189 episodios frente a 203 en el mercado 1 y en 260 frente a 282 en reversión. En reversión es más rápido en las 3 semillas, pero en el mercado 1 solo en una, así que allí lo tratamos como un empate. Con los hiperparámetros propios de cada algoritmo la distancia crece (107 frente a 200 y 262 frente a 356), aunque entonces cambian a la vez α, γ y ε. Creemos que se debe a que el objetivo de Q&#8209;Learning usa el máximo y apunta desde el principio a la política greedy, mientras que SARSA estima el valor de una política ε-greedy cuya ε va bajando: su objetivo se mueve y es más ruidoso, porque depende de la acción muestreada, y eso encaja con que prefiera un α menor. El coste por episodio es prácticamente el mismo (unos 19 s por cada 1&nbsp;000), así que el tiempo de cómputo solo cambia con el número de episodios.
 
-- **Hiperparámetros.** α pequeño: 0,001 (Q-Learning) y 0,0005 (SARSA, mercados 1 y 3). Con α = 0,1 se hunden en validación (x14 y x19, mercado 1). γ = 0 en el mercado 1, donde SARSA necesita 1 000 episodios.
-- **Convergencia (duelo).** Q-Learning llega antes en mediana: 189 frente a 203 episodios (mercado 1) y 260 frente a 282 (reversión). En reversión gana en 3 de 3 semillas; en el mercado 1, en una sola.
-- **Misma política.** 20 estados, ε baja a 0,01 y un error cuesta un 0,1 %: no hay «acantilado».
-- **Cuándo difieren.** Con ε mínimo 0,05, SARSA es más conservador (reversión: 32 → 22 operaciones). En el duelo opera menos en el mercado 1 (53 frente a 67; 2 de 3 semillas); en reversión no hay patrón (48 frente a 38 en mediana, 1 de 3 semillas).
+Que los dos acaben en la misma política tiene explicación. Con 20 estados y 3 acciones hay pocas políticas greedy posibles, y hacia el episodio 460 ε ya vale 0,01, con lo que Q(S′,&nbsp;A′) es casi igual a máx&nbsp;Q(S′,&nbsp;a). Tampoco hay un acantilado que castigue explorar: un error cuesta un 0,1&nbsp;%. Varias semillas de los dos algoritmos dan exactamente la misma tabla. En el mercado 1, las 10 semillas producen solo tres resultados: x472 y x502 con ambos algoritmos, y x605 en dos semillas de Q&#8209;Learning. La diferencia entre x502 y x472 de la Tabla 1 refleja cuántas semillas caen en cada política, no que un algoritmo sea mejor. Las diferencias aparecen cuando se explora más: con un ε mínimo de 0,05, SARSA es más conservador y en reversión pasa de 32 a 22 operaciones. En el duelo opera menos en el mercado 1 (53 frente a 67 operaciones, en 2 de 3 semillas), mientras que en reversión no se observa un patrón claro (48 frente a 38 en mediana, 1 de 3 semillas). Q&#8209;Learning converge algo antes, pero el resultado final depende mucho más del estado y de los hiperparámetros que de elegir uno u otro.
 
-![Duelo Q-Learning frente a SARSA](figures/04_informe_convergencia.png){: style="width:76%; margin:0 auto"}
-<p class="cap">Figura 2. Duelo Q-Learning–SARSA en los mercados 1 y 3 con la misma configuración (α 0,001, γ 0,9, ε 0,99 / 0,01, 1 000 episodios) y las mismas 3 semillas: episodios hasta alcanzar el 90 % de la mejora de la recompensa (media móvil 50) y operaciones por episodio de la política greedy en validación. Punto = semilla; raya = mediana; la línea gris une la misma semilla.</p>
+<div class="side side4" markdown="1">
+<div markdown="1">
 
-<div class="verdict">Q-Learning converge algo antes, pero los dos aprenden la misma estrategia: pesan más el estado y los hiperparámetros que el algoritmo.</div>
+![Curvas de aprendizaje del duelo](figures/informe_fig2.png)
 
-## 3. ¿Qué hay más allá?
+</div>
+<div markdown="1">
+<p class="cap"><b>Figura 2.</b> Recom&shy;pensa durante el entre&shy;na&shy;miento del duelo, con el mercado 1 a la izquierda y el 3 a la derecha, en media móvil de 50 epi&shy;so&shy;dios. La línea es la mediana de 3 semillas, la banda va del mínimo al máximo y la vertical punteada marca el episodio de con&shy;ver&shy;gencia. No mos&shy;tramos los mercados 2 y 4: allí la curva sube solo porque, al bajar ε, el agente deja de pagar comi&shy;siones por acciones alea&shy;to&shy;rias, y eso no es apren&shy;di&shy;zaje.</p>
+</div>
+</div>
 
-Probamos estado enriquecido (MA30 + volatilidad, 180 celdas), dos mercados extra, S&P 500 real y anexo de robustez. Configuración fija (800 episodios): no comparable 1 a 1 con §1.
+<div class="side side3" markdown="1">
+<div markdown="1">
 
-![Más allá de los mínimos](figures/04_informe_mas_alla.png){: style="width:76%; margin:0 auto"}
-<p class="cap">Figura 3. Izquierda: mediana de la diferencia emparejada enriquecido − base por historia, con IC95 bootstrap. Derecha: S&amp;P 500, retorno de cada año de test menos buy &amp; hold (walk-forward anual, Q-Learning).</p>
+![Duelo Q-Learning frente a SARSA](figures/informe_fig3.png)
 
-- **Estado:** mejora donde hay memoria. Con Q-Learning: +23,1 pp en reversión, +19,1 pp en tendencia persistente y +7,8 pp en regímenes (IC95 > 0).
-- **Indicador:** basta uno por mercado. MA30 en reversión y tendencia; volatilidad en regímenes (+8,5 % frente a 0 %).
-- **Mercados extra:** en tendencia persistente, base +104,5 % y enriquecido +123,8 %, frente a +22,8 % de buy & hold. En saltos no opera (0&nbsp;% frente a −22,4&nbsp;%).
-- **S&P 500:** base iguala a buy & hold con 1 operación (+45,9 % frente a +44,2 %). El enriquecido baja a +28,3 %. Walk-forward 2019–2025: sin ventaja.
-- **Robustez:** placebos sin ventaja falsa. ×4 episodios, otros algoritmos TD o recompensa log apenas cambian. Comisión: reversión aguanta el 0,5 % (+23,0 %); regímenes cae a 0 % con 0,25 %.
+</div>
+<div markdown="1">
+<p class="cap"><b>Figura 3.</b> Duelo en los mercados 1 y 3 con la misma con&shy;fi&shy;gu&shy;ra&shy;ción (α&nbsp;=&nbsp;0,001, γ&nbsp;=&nbsp;0,9, ε de 0,99&nbsp;/&nbsp;0,01, 1&nbsp;000 epi&shy;so&shy;dios) y las mismas 3 semillas, y por tanto las mismas series de entre&shy;na&shy;miento; solo cambia el objetivo TD. A la izquierda, epi&shy;so&shy;dios hasta con&shy;verger; a la derecha, ope&shy;ra&shy;ciones por episodio de la política greedy en vali&shy;da&shy;ción. Cada punto es una semilla, la raya hori&shy;zontal es la mediana y la línea gris une los resul&shy;tados de una misma semilla.</p>
+</div>
+</div>
 
-<div class="verdict">Lo que decide es la información del estado, no el algoritmo; en el índice real no hay ventaja sobre buy & hold.</div>
+## 4. Extensiones: estado enriquecido, otros mercados y S&P 500
 
-## 4. Límites y qué haríamos con más tiempo
+Fuera de los mínimos probamos un estado enriquecido con la media móvil de 30 periodos (MA30) y la volatilidad (180 celdas), dos mercados sintéticos adicionales, datos reales del S&P 500 y un anexo de robustez. Aquí usamos una configuración fija de 800 episodios, por lo que las cifras no se comparan una a una con las de la sección 2.
+
+<div class="side side2" markdown="1">
+<div markdown="1">
+
+![Más allá de los mínimos](figures/informe_fig4.png)
+
+</div>
+<div markdown="1">
+<p class="cap"><b>Figura 4.</b> Izquierda: mediana, por historia, de la dife&shy;rencia empa&shy;re&shy;jada entre el estado enri&shy;que&shy;cido y el base, con inter&shy;valo de con&shy;fianza boots&shy;trap del 95&nbsp;%; 5 semillas y la misma con&shy;fi&shy;gu&shy;ra&shy;ción en los dos estados. Derecha: retorno de cada año de test en el S&amp;P 500 menos el de buy &amp; hold (walk-forward anual, Q&#8209;Learning).</p>
+
+El estado enri&shy;que&shy;cido mejora donde el precio tiene memoria (Figura 4, izquierda): con Q&#8209;Learning gana 23,1 pp en rever&shy;sión, 19,1 pp en ten&shy;dencia per&shy;sis&shy;tente y 7,8 pp en regí&shy;menes, y en los tres el IC95 queda por encima de cero.
+
+</div>
+</div>
+
+Probando los indicadores por separado, casi toda la mejora viene de uno por mercado: la MA30 en reversión y en tendencia, y la volatilidad en regímenes, donde por sí sola da un +8,5&nbsp;% frente al 0&nbsp;% del estado base. En los mercados adicionales, con tendencia persistente el estado base obtiene +104,5&nbsp;% y el enriquecido +123,8&nbsp;%, frente al +22,8&nbsp;% de buy & hold; con difusión y saltos no opera (0&nbsp;% frente a −22,4&nbsp;%).
+
+En el S&P 500 el estado base iguala a buy & hold con una sola operación (+45,9&nbsp;% frente a +44,2&nbsp;%), mientras que el enriquecido baja a +28,3&nbsp;%, y en el walk-forward anual de 2019 a 2025 (Figura 4, derecha) tampoco encontramos ventaja. En el anexo de robustez, los placebos no producen ventajas falsas, y ni multiplicar por cuatro los episodios ni cambiar de algoritmo TD (Expected SARSA, Double Q&#8209;Learning) o pasar a una recompensa logarítmica mueven mucho los resultados. Lo que sí pesa es la comisión: la estrategia de reversión aguanta una comisión del 0,5&nbsp;% (+23,0&nbsp;%), mientras que en regímenes la ganancia desaparece (0&nbsp;%) ya con un 0,25&nbsp;%. De todo ello sacamos que lo decisivo es la información que recibe el agente, y que en el índice real no conseguimos mejorar a buy & hold.
+
+## 5. Limitaciones y trabajo futuro
 
 <div class="cols" markdown="1">
 <div markdown="1">
 
-### Límites
-
-- **Estado de 20 celdas no markoviano.** La tendencia de 6 precios no identifica el régimen.
-- **La recompensa suma; el balance compone.** Con log(balance): x412 → x431 (03 §9.6).
-- **Fin de episodio = límite de tiempo** (D-2.1): 1 de 494 decisiones.
-- **"Q-Learning converge antes" es débil:** 3 semillas; en el mercado 1 gana 1 de 3.
-- **Un solo recorrido real, sin dividendos ni spread** (D-0.5). Comparaciones sin corregir; indicadores elegidos conociendo los generadores.
+El estado de 20 celdas no es mar&shy;ko&shy;viano: la ten&shy;dencia cal&shy;cu&shy;lada con 6 precios no iden&shy;ti&shy;fica el régimen ni la dis&shy;tancia a la media. La recom&shy;pensa suma retornos mientras que el balance se compone; con log(balance) como recom&shy;pensa, el estado enri&shy;que&shy;cido pasa en el mercado 1 de x412 a x431 (notebook 03, §9.6). El mercado 1 es muy disperso (la des&shy;via&shy;ción típica de Q&#8209;Learning en test dobla su media), y por eso usamos la mediana. El fin de episodio lo tratamos como límite de tiempo, lo que afecta a 1 de cada 494 deci&shy;siones (D-2.1). La afir&shy;ma&shy;ción de que Q&#8209;Learning converge antes es débil, porque se basa en 3 semillas y en el mercado 1 solo gana en una. Solo tenemos un reco&shy;rrido real, sin divi&shy;dendos ni spread (D-0.5), no hemos corre&shy;gido por com&shy;pa&shy;ra&shy;ciones múl&shy;ti&shy;ples y los indi&shy;ca&shy;dores se eli&shy;gieron cono&shy;ciendo los gene&shy;ra&shy;dores.
 
 </div>
 <div markdown="1">
 
-### Con más tiempo
+Con más tiempo pasa&shy;ríamos a usar apro&shy;xi&shy;ma&shy;ción de fun&shy;ciones y ele&shy;gi&shy;ríamos los indi&shy;ca&shy;dores en vali&shy;da&shy;ción, ya que con 180 celdas cada una se visita solo entre 800 y 1&nbsp;760 veces (mediana en los mercados sin&shy;té&shy;ticos), frente a unas 19&nbsp;400 con 20. También nos interesa medir la gene&shy;ra&shy;li&shy;za&shy;ción fuera de dis&shy;tri&shy;bu&shy;ción, entre&shy;nando en un mercado y eva&shy;luando en los otros tres (una matriz 4 × 4), y entrenar con una mezcla de gene&shy;ra&shy;dores, que es el reto mayor pro&shy;puesto en clase. En el duelo usa&shy;ríamos más semillas, medi&shy;ríamos la con&shy;ver&shy;gencia sobre la política greedy en vali&shy;da&shy;ción e inclui&shy;ríamos divi&shy;dendos, spread y la correc&shy;ción de Holm para com&shy;pa&shy;ra&shy;ciones múl&shy;ti&shy;ples.
 
-- Indicadores elegidos en validación y aproximación de funciones.
-- Entrenar con mezcla de generadores (el «reto mayor» propuesto en clase).
-- Más semillas en el duelo; convergencia sobre la política greedy en validación.
-- Dividendos y spread; corrección de Holm por comparaciones múltiples.
+Con todo, damos por cubiertos los mínimos de la práctica: los dos algo&shy;ritmos aprenden en cada mercado la estra&shy;tegia que corres&shy;ponde a su generador.
 
 </div>
 </div>
-
-<div class="verdict">La práctica cumple los mínimos: los dos algoritmos aprenden la estrategia esperada, y el límite está en el estado.</div>
