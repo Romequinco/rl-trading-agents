@@ -135,6 +135,36 @@ Claves:
 - En el mercado 4, ninguna de las 70 reglas simples sobre el estado (tendencia o reversión) bate a no operar, así que el límite está en el estado
   y no en el algoritmo (01 §9).
 
+## Comparación directa: base frente a estado enriquecido
+
+El estado enriquecido añade **distancia a MA30 y volatilidad20** al estado base de tendencia corta y posición.
+La comparación usa las dos variantes del experimento 03: mismos hiperparámetros, 800 episodios por entrenamiento,
+cinco semillas y las mismas historias de test. No se compara contra las configuraciones ajustadas de 01–02.
+Los valores son los resúmenes de retorno de `results/03_extras.csv`; **Δ = enriquecido − base**, en puntos porcentuales.
+
+| Mercado | Algoritmo | Base | Enriquecido | Δ retorno (pp) |
+|---|---|---:|---:|---:|
+| Reversión a la media | Q-Learning | +18.1% | +42.8% | +24.6 |
+| Reversión a la media | SARSA | +18.1% | +43.8% | +25.6 |
+| Regímenes | Q-Learning | +0.0% | +7.8% | +7.8 |
+| Regímenes | SARSA | +0.0% | +7.5% | +7.5 |
+| Tendencia persistente | Q-Learning | +104.5% | +123.8% | +19.3 |
+| Tendencia persistente | SARSA | +103.0% | +128.7% | +25.7 |
+| Difusión + saltos | Q-Learning | +0.0% | +0.0% | +0.0 |
+| Difusión + saltos | SARSA | +0.0% | +0.0% | +0.0 |
+| S&P 500 · real | Q-Learning | +45.9% | +28.3% | -17.5 |
+| S&P 500 · real | SARSA | +45.9% | +29.9% | -16.0 |
+
+Mejora el retorno en reversión, regímenes y tendencia persistente; en difusión con saltos no hay cambio.
+En el S&P 500, el enriquecido reduce el retorno y también la caída máxima: Q-Learning pasa de 18,9 % a 11,4 %
+de drawdown y SARSA de 18,9 % a 12,8 %. Añadir información no mejora todas las medidas en todos los mercados.
+La serie real es un único recorrido de test de 2024–2025; las semillas no son historias independientes.
+
+La [comparación completa](results/03_base_vs_enriquecido.md) incluye las tablas de rentabilidad y drawdown y un gráfico
+de las diferencias. También se muestra en el apartado **«Base frente a estado enriquecido»** de
+`notebooks/03_extras.ipynb`, que regenera el [CSV de diferencias](results/03_base_vs_enriquecido.csv), el informe y la figura.
+Estas diferencias entre resúmenes no son la mediana de diferencias emparejadas de `03_estado_deltas.csv`.
+
 ## Estado
 
 - [x] Estructura del repositorio y código común
