@@ -172,7 +172,7 @@ Estas diferencias entre resúmenes no son la mediana de diferencias emparejadas 
 - [x] 00 Entorno y baselines (D-0.1, D-1.1 y D-0.3 cerradas)
 - [x] 01 Q-Learning (D-0.4, D-2.2, D-2.3 y D-2.4)
 - [x] 02 SARSA (D-2.5)
-- [x] 03 Extras (estado enriquecido, mercados extra y serie real)
+- [x] 03 Extras (estado enriquecido, mercados extra y serie real) y anexo de robustez (D-1.4)
 - [ ] 04 Comparativa
 - [ ] Informe PDF
 
@@ -197,3 +197,25 @@ originales se conservan. Los extras solo amplían el registro de mercados cuando
 importa ese módulo, para no alterar los barridos de 00–02. Decisiones: D-1.2, D-1.3 y D-0.5.
 
 Pruebas desde la raíz: `.\.venv\Scripts\python.exe -m unittest discover -s tests -v`.
+
+### Anexo del 03: pruebas de robustez
+
+La sección 9 de `notebooks/03_extras.ipynb` reutiliza el mismo protocolo y cambia un solo factor
+cada vez, con Q-Learning y el estado enriquecido como referencia. Son 360 entrenamientos, y los
+40 que coinciden con el §6 reproducen sus resultados semilla a semilla. El código está en
+`src/extras_anexo.py` (no modifica `extras.py`); las salidas son `results/03_anexo*.csv`,
+[`03_anexo_conclusiones.md`](results/03_anexo_conclusiones.md) y las figuras `03_anexo_*.png`.
+
+| Pregunta | Resultado |
+|---|---|
+| ¿Qué indicador aporta? | Uno por mercado: MA30 en reversión (+44,0 % solo con MA30, frente a +42,8 % con ambos) y en tendencia persistente; volatilidad en regímenes (+8,5 %, frente a 0 % solo con MA30) |
+| ¿Falta entrenamiento? | No: con ×4 episodios el S&P 500 pasa de +28,3 % a +28,7 % |
+| Placebos | Browniano: no opera. S&P 500 barajado (mismo buy & hold, +44,2 %): base +44,0 %, enriquecido +11,1 % |
+| Comisión 0–0,5 % | El agente opera menos al subir el coste. Regímenes pierde la ventaja con 0,25 %; reversión conserva +23 % y tendencia +80 % con 0,5 % |
+| Expected SARSA y Double Q | Los cuatro algoritmos quedan dentro del rango entre semillas |
+| Recompensa log(balance) | Sin cambios relevantes; leve mejora en tendencia + ciclo (×431 frente a ×412) |
+| Walk-forward S&P 500 2019–2025 | Ningún estado bate de forma consistente a buy & hold; el enriquecido reduce la caída máxima en 4 de 7 años |
+
+El mapa de la política greedy muestra las reglas aprendidas: compra por debajo de MA30 en reversión,
+se queda fuera con volatilidad alta en regímenes y sigue la tendencia por encima de MA30 en tendencia
+persistente. Decisión: D-1.4.

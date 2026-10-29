@@ -245,3 +245,31 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   operativa ni recomendación de inversión.
 - **Fuente:** https://fred.stlouisfed.org/series/SP500; descarga fijada el 2026-10-28.
 - **Estado:** CERRADA.
+
+### D-1.4 · Anexo del 03: pruebas de robustez con un factor cada vez
+
+- **Fecha:** 2026-10-29
+- **Decisión:** ampliar el 03 con una sección 9 que contrasta sus límites con el mismo protocolo
+  (D-1.2, D-0.5). La referencia es Q-Learning con el estado enriquecido y la configuración de D-1.2;
+  en cada prueba cambia un único factor:
+  - estado: base, +MA30, +volatilidad o ambos;
+  - episodios: ×1, ×2 o ×4;
+  - placebos: browniano y S&P 500 con los retornos permutados dentro de cada split;
+  - comisión: de 0 % a 0,5 %;
+  - algoritmo: Q-Learning, SARSA, Expected SARSA o Double Q-Learning;
+  - recompensa: la del taller o log(balance);
+  - test real: walk-forward anual de 2019 a 2025.
+- **Implementación:** `src/extras_anexo.py` importa `extras.py` sin modificarlo, con caché propia en
+  `results/cache/03_anexo/`. `CostTradingEnv` copia la contabilidad del taller con la comisión como
+  parámetro, y una prueba comprueba que con 0,1 % coincide con `SimpleTradingEnv`. Los entrenamientos
+  que coinciden entre pruebas se hacen una sola vez, y los 40 que coinciden con el §6 reproducen sus
+  resultados semilla a semilla.
+- **Protocolo:** las configuraciones se fijan antes del test y no se selecciona ninguna, así que no se
+  usa validación. El barajado conserva el precio en cada frontera de split, de modo que buy & hold
+  obtiene el mismo retorno en test que en la serie real. En el walk-forward, los bins y las ventanas
+  de entrenamiento solo usan los años anteriores al año de test.
+- **Resultado:** cada mercado aprovecha un solo indicador (MA30 en reversión y tendencia,
+  volatilidad en regímenes). Más episodios, otro algoritmo TD o la recompensa logarítmica apenas
+  cambian el resultado, y los placebos no muestran una ventaja falsa. En el S&P 500, ningún estado
+  bate de forma consistente a buy & hold en siete años de test (`results/03_anexo_conclusiones.md`).
+- **Estado:** CERRADA.
