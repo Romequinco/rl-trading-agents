@@ -184,8 +184,10 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
 - **Fecha:** 2026-10-26
 - **Decisión:** el informe se redacta en `results/informe.md`, junto a las tablas y figuras, y se
   exporta a PDF de 2 páginas como máximo.
-- **Pendiente:** herramienta de exportación y plantilla.
-- **Estado:** ABIERTA
+- **Exportación (2026-10-29):** `python build_informe.py --png` convierte el Markdown en HTML con estilos de
+  impresión A4 y lo imprime a PDF con Chrome sin interfaz; falla si el PDF pasa de 2 páginas. Las figuras
+  salen del 04 (`04_informe_*.png`) y la tabla de `results/04_informe_tabla.md`.
+- **Estado:** CERRADA
 
 ### D-1.2 · Extras: estado causal ampliado con comparación controlada
 

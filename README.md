@@ -174,7 +174,7 @@ Estas diferencias entre resúmenes no son la mediana de diferencias emparejadas 
 - [x] 02 SARSA (D-2.5)
 - [x] 03 Extras (estado enriquecido, mercados extra y serie real) y anexo de robustez (D-1.4)
 - [x] 04 Comparativa (tabla final, Q-Learning frente a SARSA, extras, figuras del informe y análisis crítico)
-- [ ] Informe PDF
+- [x] Informe PDF (`results/informe.pdf`, 2 páginas; se regenera con `python build_informe.py`; falta poner los nombres del grupo)
 
 ## Extras del notebook 03
 
