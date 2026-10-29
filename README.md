@@ -120,7 +120,7 @@ Mediana del retorno en las **200 series de test** (`results/00_baselines.csv`, `
 
 | Mercado | Aleatorio | Buy & hold | **Q-Learning** | **SARSA** | Estrategia aprendida (las dos coinciden) |
 |---|---|---|---|---|---|
-| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | **x471** | Sigue la tendencia (entra en bins altos, sale en 1–3) |
+| 1 · Tendencia + ciclo | x4,3 | x33,6 | **x502** | **x472** | Sigue la tendencia (entra en bins altos, sale en 1–3) |
 | 2 · Browniano | −19,4 % | −3,5 % | **0 %** | **0 %** | No opera (correcto: no hay señal) |
 | 3 · Reversión a la media | −17,2 % | −0,3 % | **+27,0 %** | **+27,0 %** | Compra tras la caída más fuerte y vende tras la subida más fuerte |
 | 4 · Regímenes | −22,0 % | −12,5 % | **0 %** | **0 %** | No opera: es lo óptimo con este estado (D-2.4) |
@@ -173,7 +173,7 @@ Estas diferencias entre resúmenes no son la mediana de diferencias emparejadas 
 - [x] 01 Q-Learning (D-0.4, D-2.2, D-2.3 y D-2.4)
 - [x] 02 SARSA (D-2.5)
 - [x] 03 Extras (estado enriquecido, mercados extra y serie real) y anexo de robustez (D-1.4)
-- [ ] 04 Comparativa
+- [x] 04 Comparativa (tabla final, Q-Learning frente a SARSA, extras, figuras del informe y análisis crítico)
 - [ ] Informe PDF
 
 ## Extras del notebook 03
@@ -219,3 +219,12 @@ cada vez, con Q-Learning y el estado enriquecido como referencia. Son 360 entren
 El mapa de la política greedy muestra las reglas aprendidas: compra por debajo de MA30 en reversión,
 se queda fuera con volatilidad alta en regímenes y sigue la tendencia por encima de MA30 en tendencia
 persistente. Decisión: D-1.4.
+
+## Comparativa final (04)
+
+`notebooks/04_comparativa.ipynb` no entrena: lee `results/` y reúne la tabla final de los 4 mercados
+(`results/04_tabla_final.csv`), la estrategia esperada frente a la aprendida, Q-Learning frente a SARSA
+(hiperparámetros, duelo y semillas; `04_algoritmos.csv`), la síntesis del 03 (`04_extras.csv`) y el
+análisis crítico. Para el informe deja tres figuras a 17 cm de ancho (`04_informe_rendimiento.png`,
+`04_informe_convergencia.png` y `04_informe_mas_alla.png`) y la tabla lista para pegar en
+[`results/04_informe_tabla.md`](results/04_informe_tabla.md).

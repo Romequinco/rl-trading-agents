@@ -147,8 +147,8 @@ Formato ligero tipo ADR. ID `D-X.n`: `X` es el bloque (0 general, 1 entorno/esta
   `episodios_convergencia` del test final, que mezcla algoritmo e hiperparámetros.
 - **Hiperparámetros:** mercado 1 → α 0,0005, γ 0, ε 0,99 / 0,01, 1 000 episodios; mercado 3 → α 0,0005, γ 0,9,
   ε 0,99 / 0,01, 500 episodios; mercados 2 y 4 → valores de partida (no opera con ninguna combinación).
-- **Test (02 §7):** x471 · 0 % · +27,0 % · 0 %. Varias semillas reproducen exactamente la política de Q-Learning
-  (x501,3 y +27,0 %): con 20 estados × 3 acciones los dos llegan a la misma tabla de decisiones.
+- **Test (02 §7):** x472 · 0 % · +27,0 % · 0 %. Varias semillas reproducen exactamente la política de Q-Learning
+  (x502 y +27,0 %): con 20 estados × 3 acciones los dos llegan a la misma tabla de decisiones.
 - **Convergencia (02 §6 y §9):** Q-Learning converge antes (duelo: 189 frente a 203 episodios en el mercado 1, 260
   frente a 282 en reversión). SARSA tiene algo más de recompensa online y opera menos (56 frente a 66 operaciones en el
   mercado 1), como predice *cliff walking*, pero la diferencia es pequeña porque un error de exploración solo cuesta un

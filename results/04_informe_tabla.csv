@@ -1,0 +1,5 @@
+mercado,aleatorio,buy_hold,qlearning,sarsa,ops_qlearning,ops_sarsa,conv_duelo_qlearning,conv_duelo_sarsa,qlearning_enriquecido_03,politica
+tendencia_ciclo,3.303508900216569,32.61671139660724,501.30035567563175,470.63037201904194,47.905,56.845,189.0,203.0,410.92335858868313,Sigue la tendencia
+browniano,-0.1939569730426746,-0.0347104085925771,0.0,0.0,0.0,0.0,,,0.0,No opera: no hay señal
+reversion_media,-0.1715405648902355,-0.0032844269439453,0.2698779571790297,0.2698779571790297,29.055,29.055,260.0,282.0,0.4278357494167344,Compra tras caídas y vende tras subidas
+regimenes,-0.2198388862191626,-0.1249137024411842,0.0,0.0,0.0,0.0,,,0.0782221748270237,No opera: el estado no ve el régimen
