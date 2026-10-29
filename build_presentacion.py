@@ -54,7 +54,7 @@ th:first-child, td:first-child { text-align: left; }
 .annex .kicker { color: #888; }
 """
 
-FOOT = "RL tabular para trading · Romero, Dapena y García · MIAX"
+FOOT = "RL tabular para trading · Romero, Dapena y García · MIAX · github.com/Romequinco/rl-trading-agents"
 
 
 def main():

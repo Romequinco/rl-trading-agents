@@ -111,7 +111,7 @@ El estado de 20 celdas **no es mar&shy;ko&shy;viano**: la ten&shy;dencia cal&shy
 
 Con más tiempo pasa&shy;ríamos a usar apro&shy;xi&shy;ma&shy;ción de fun&shy;ciones y ele&shy;gi&shy;ríamos los indi&shy;ca&shy;dores en vali&shy;da&shy;ción, ya que con 180 celdas cada una se visita solo entre 800 y 1&nbsp;760 veces (mediana en los mercados sin&shy;té&shy;ticos), frente a unas 19&nbsp;400 con 20. También nos interesa medir la gene&shy;ra&shy;li&shy;za&shy;ción fuera de dis&shy;tri&shy;bu&shy;ción, entre&shy;nando en un mercado y eva&shy;luando en los otros tres (una matriz 4 × 4), y entrenar con una mezcla de gene&shy;ra&shy;dores, que es el reto mayor pro&shy;puesto en clase. En el duelo usa&shy;ríamos más semillas, medi&shy;ríamos la con&shy;ver&shy;gencia sobre la política *greedy* en vali&shy;da&shy;ción e inclui&shy;ríamos divi&shy;dendos, *spread* y la correc&shy;ción de Holm para com&shy;pa&shy;ra&shy;ciones múl&shy;ti&shy;ples.
 
-Con todo, **damos por cubiertos los mínimos de la práctica**: los dos algo&shy;ritmos aprenden en cada mercado la estra&shy;tegia que corres&shy;ponde a su generador.
+Con todo, **damos por cubiertos los mínimos**: los dos algo&shy;ritmos aprenden la estra&shy;tegia de cada generador. Código y resultados en <a href="https://github.com/Romequinco/rl-trading-agents" style="color:inherit">github.com/Romequinco/rl-trading-agents</a>.
 
 </div>
 </div>
