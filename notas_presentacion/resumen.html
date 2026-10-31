@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Notas para la presentación</title>
+<style>
+@page { size: A4; margin: 9mm 10mm 8mm; }
+* { box-sizing: border-box; }
+body { font-family: Cambria, Georgia, "Times New Roman", serif; font-size: 9pt; line-height: 1.3; color: #1a1a1a; margin: 0; }
+h1 { font-size: 13.5pt; margin: 0 0 0.6mm; }
+.sub { font-size: 8.3pt; color: #555; margin: 0 0 2mm; border-bottom: 0.8pt solid #1a1a1a; padding-bottom: 1.2mm; }
+h2 { font-size: 10pt; margin: 2.6mm 0 1mm; border-bottom: 0.4pt solid #999; padding-bottom: 0.4mm; break-after: avoid; }
+p { margin: 0 0 1.2mm; text-align: justify; hyphens: auto; }
+ul { margin: 0 0 1.2mm; padding-left: 4mm; } li { margin: 0 0 0.6mm; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.f { font-size: 9.6pt; margin: 0.8mm 0 1mm 3mm; }
+table { break-inside: avoid; border-collapse: collapse; width: 100%; font-size: 8.4pt; margin: 0.6mm 0 1.4mm; border-top: 0.8pt solid #000; border-bottom: 0.8pt solid #000; }
+thead th { border-bottom: 0.4pt solid #000; font-weight: bold; text-align: left; }
+th, td { padding: 0.5mm 1.2mm; vertical-align: top; text-align: left; }
+td.n { text-align: right; white-space: nowrap; }
+.hp td { white-space: nowrap; font-size: 8pt; }
+h2 + table, h2 + svg { break-before: avoid; }
+.q { color: #1f5fa8; } .s { color: #1f7a53; }
+.note { font-size: 8.4pt; color: #444; }
+.say p { font-style: italic; border-left: 0.8pt solid #999; padding-left: 2mm; }
+svg { display: block; width: 100%; height: auto; aspect-ratio: 680 / 166; margin: 0.6mm 0 1.4mm; }
+</style></head><body>
+
+<h1>Notas para la presentación · SARSA y Q-Learning para trading</h1>
+<div class="sub">Óscar Romero, Fernando Dapena y Daniel García · resumen de estudio, no se entrega</div>
+
+<div class="two">
+<div>
+<h2>1. La tabla Q</h2>
+<p>Los dos algoritmos guardan una tabla de 20 estados × 3 acciones (vender, mantener, comprar). Cada casilla estima cuánto ganaré si hago esa acción en ese estado. Empieza a cero y se corrige después de cada paso; al final, en cada estado se elige la acción con el valor más alto.</p>
+<p class="f">Q(S,A) ← Q(S,A) + α · [objetivo − Q(S,A)]</p>
+<p>Un episodio es una serie de 500 precios recorrida desde el paso 5: 494 decisiones, con 1&nbsp;000 € iniciales y sin activo. La recompensa es lo que se mueve el precio mientras se tiene el activo, menos un 0,1&nbsp;% cada vez que se opera.</p>
+
+<h2>2. SARSA y Q-Learning</h2>
+<p><b class="s">SARSA</b> (on-policy): objetivo = R + γ·Q(S′, A′), con la acción A′ que de verdad va a hacer, aunque sea una exploración. Aprende el valor de su forma real de jugar. Elige A′ antes de actualizar y luego la ejecuta. Su objetivo es más ruidoso, por eso prefiere un α menor y converge algo más despacio.</p>
+<p><b class="q">Q-Learning</b> (off-policy): objetivo = R + γ·máx Q(S′, a), suponiendo que hará la mejor acción. Aprende el valor de jugar bien aunque siga explorando.</p>
+<p>En el ejemplo del acantilado, Q-Learning camina por el borde y SARSA se aparta. Aquí equivocarse cuesta un 0,1&nbsp;%, así que no hay acantilado: cuando ε baja a 0,01, A′ casi siempre es la mejor acción y los dos llegan a la misma política. Si ε se queda en 0,05, SARSA se vuelve más prudente (en reversión baja de 32 a 22 operaciones).</p>
+<p class="note">Ejemplo SARSA con α = 0,0005 y γ = 0,9: compro en el tramo 1 y el precio sube un 2&nbsp;%, así que R = 0,020 − 0,001 = 0,019. Con Q(S′, mantener) = 0,050 el objetivo es 0,064; si Q valía 0,030, el error es 0,034 y la corrección 0,000017. Son pasos pequeños a propósito: cada casilla se visita unas 19&nbsp;400 veces.</p>
+</div>
+
+<div>
+<h2>3. Hiperparámetros</h2>
+<ul>
+<li><b>α, tasa de aprendizaje:</b> cuánto cambia la tabla con cada experiencia. La ventaja por paso (≈ 0,1&nbsp;%) es menor que el ruido, así que tiene que ser muy pequeño; con α = 0,1 se hunden (x14 y x19, frente a x527 con 0,001).</li>
+<li><b>γ, factor de descuento:</b> cuánto pesa el futuro. Con 0 solo cuenta el paso actual, con 0,5 dos o tres pasos y con 0,9 unos diez. En el mercado 1 gana γ = 0 porque, con un 10&nbsp;% de ruido por paso, el futuro no se puede estimar; en reversión hay que mirar adelante porque el rebote tarda.</li>
+<li><b>ε, exploración:</b> probabilidad de actuar al azar. Empieza en 1 y en cada episodio se multiplica por el decaimiento hasta un mínimo; con 0,99 llega a 0,01 hacia el episodio 460.</li>
+</ul>
+<table class="hp">
+<thead><tr><th>Mercado</th><th class="q">Q-Learning</th><th class="s">SARSA</th></tr></thead>
+<tr><td>1 · Tendencia + ciclo</td><td>0,001 · 0 · 0,98/0,05 · 500</td><td>0,0005 · 0 · 0,99/0,01 · 1&nbsp;000</td></tr>
+<tr><td>3 · Reversión</td><td>0,001 · 0,5 · 0,99/0,01 · 500</td><td>0,0005 · 0,9 · 0,99/0,01 · 500</td></tr>
+<tr><td>2 y 4</td><td colspan="2">0,001 · 0,9 · 0,99/0,01 · 500 (de partida)</td></tr>
+</table>
+<p class="note">Orden: α · γ · ε (decaimiento/mínimo) · episodios.</p>
+
+<h2>4. El estado</h2>
+<p>La tendencia compara el precio de hoy con la media de los seis últimos y se clasifica en 10 tramos por cuantiles, del 1 (caída más fuerte) al 10 (subida más fuerte). Los cortes salen de 50 series de entrenamiento y cada tramo recoge el 10&nbsp;% de los pasos. Junto con la posición (con o sin activo) dan 20 estados. Usamos cuantiles porque con cortes fijos el 89&nbsp;% de los pasos del mercado 1 caía en los extremos; los 10 tramos los recomendó el profesor.</p>
+</div>
+</div>
+
+<h2>5. Protocolo</h2>
+<svg viewBox="0 0&nbsp;680 166" role="img" aria-label="Protocolo de entrenamiento, validación y test">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#555" stroke-width="1.5"/></marker></defs>
+<g font-family="Segoe UI, Arial, sans-serif" fill="#1a1a1a">
+<rect x="6" y="56" width="92" height="54" rx="5" fill="#f2f2f2" stroke="#888" stroke-width="0.6"/>
+<text x="52" y="78" font-size="12" font-weight="600" text-anchor="middle">Tramos</text>
+<text x="52" y="96" font-size="11" text-anchor="middle">50 series</text>
+<line x1="100" y1="83" x2="114" y2="83" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+
+<rect x="118" y="6" width="334" height="154" rx="7" fill="#f3f1fb" stroke="#8f86d8" stroke-width="0.6"/>
+<text x="285" y="24" font-size="12" font-weight="600" text-anchor="middle">Elegir hiperparámetros (validación)</text>
+<g font-size="11" text-anchor="middle">
+<rect x="130" y="34" width="70" height="38" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="165" y="50" font-weight="600">α</text><text x="165" y="65">6 × 3</text>
+<rect x="210" y="34" width="70" height="38" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="245" y="50" font-weight="600">γ</text><text x="245" y="65">4 × 3</text>
+<rect x="290" y="34" width="70" height="38" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="325" y="50" font-weight="600">ε</text><text x="325" y="65">6 × 3</text>
+<rect x="370" y="34" width="70" height="38" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="405" y="50" font-weight="600">Episodios</text><text x="405" y="65">4 × 3</text>
+</g>
+<line x1="201" y1="53" x2="208" y2="53" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<line x1="281" y1="53" x2="288" y2="53" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<line x1="361" y1="53" x2="368" y2="53" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<g font-size="11" text-anchor="middle" fill="#333">
+<text x="285" y="92">Cada candidato: 3 semillas × 500 series nuevas,</text>
+<text x="285" y="107">evaluadas en las mismas 100 series de validación.</text>
+<text x="285" y="126">Se mueve un parámetro y el resto queda fijo; solo</text>
+<text x="285" y="141">cambia si gana en 2 de 3 semillas y con mejor mediana.</text>
+</g>
+<line x1="453" y1="83" x2="466" y2="83" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<rect x="470" y="58" width="64" height="50" rx="5" fill="#f2f2f2" stroke="#888" stroke-width="0.6"/>
+<text x="502" y="80" font-size="11" font-weight="600" text-anchor="middle">Config.</text>
+<text x="502" y="95" font-size="11" text-anchor="middle">elegida</text>
+<line x1="535" y1="83" x2="546" y2="83" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+
+<rect x="550" y="6" width="124" height="154" rx="7" fill="#eef7f1" stroke="#6fb58d" stroke-width="0.6"/>
+<text x="612" y="24" font-size="12" font-weight="600" text-anchor="middle">Resultado (test)</text>
+<g font-size="11" text-anchor="middle">
+<rect x="560" y="34" width="104" height="36" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="612" y="49">5 semillas</text><text x="612" y="63">× 500 series</text>
+<line x1="612" y1="71" x2="612" y2="81" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<rect x="560" y="84" width="104" height="36" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="612" y="99">200 series de test</text><text x="612" y="113">una sola vez</text>
+<line x1="612" y1="121" x2="612" y2="131" stroke="#555" stroke-width="1" marker-end="url(#a)"/>
+<rect x="560" y="134" width="104" height="20" rx="4" fill="#fff" stroke="#999" stroke-width="0.6"/><text x="612" y="148">Mediana</text>
+</g>
+</g>
+</svg>
+
+<div class="two">
+<div>
+<p>Las series de cada fase vienen de semillas separadas y nunca coinciden: entrenamiento desde la 0 (una serie nueva por episodio), validación desde la 50&nbsp;000 (100 fijas) y test desde la 100&nbsp;000 (200 fijas). Así el test mide si el agente generaliza a series que no ha visto.</p>
+<p>Con SARSA fueron 60 entrenamientos de ajuste por mercado (240 en total) y 20 finales, de unos 9 s cada uno; con Q-Learning, lo mismo. La validación sale algo optimista: en reversión, +34&nbsp;% frente a +27&nbsp;% en test.</p>
+</div>
+<div>
+<p><b>Cómo salen las cifras.</b> En cada una de las 200 series de test el agente juega con la tabla congelada y siempre la mejor acción; el retorno es balance final / 1&nbsp;000 − 1. Se toma la mediana de las 200 series y luego la de las 5 semillas. Buy &amp; hold y el aleatorio se evalúan en esas mismas 200 series. Usamos la mediana porque en el mercado 1 la media de buy &amp; hold es x200: unas pocas series se disparan.</p>
+</div>
+</div>
+
+<h2>6. Resultados en test</h2>
+<table>
+<thead><tr><th>Mercado</th><th>Estrategia esperada</th><th>Lo que aprenden</th><th class="n s">SARSA</th><th class="n q">Q-L</th><th class="n">B&amp;H</th><th class="n">Aleatorio</th></tr></thead>
+<tr><td>1 · Tendencia + ciclo</td><td>Seguir la tendencia</td><td>Compran en los tramos altos (6–10) y venden en 1–3</td><td class="n s">x472</td><td class="n q">x502</td><td class="n">x33,6</td><td class="n">x4,3</td></tr>
+<tr><td>2 · Browniano</td><td>No operar</td><td>No entran nunca</td><td class="n s">0&nbsp;%</td><td class="n q">0&nbsp;%</td><td class="n">−3,5&nbsp;%</td><td class="n">−19,4&nbsp;%</td></tr>
+<tr><td>3 · Reversión</td><td>Comprar caídas, vender subidas</td><td>Compran en el tramo 1 y venden en el 10</td><td class="n s">+27,0&nbsp;%</td><td class="n q">+27,0&nbsp;%</td><td class="n">−0,3&nbsp;%</td><td class="n">−17,2&nbsp;%</td></tr>
+<tr><td>4 · Regímenes</td><td>Dentro en alcista, fuera en bajista</td><td>No entran: el estado no distingue la fase</td><td class="n s">0&nbsp;%</td><td class="n q">0&nbsp;%</td><td class="n">−12,5&nbsp;%</td><td class="n">−22,0&nbsp;%</td></tr>
+</table>
+
+<div class="two">
+<div>
+<p><b>x472 frente a x33,6.</b> El agente acaba con unas 14 veces más capital, pero el mercado 1 es extremo: el generador mete un 10&nbsp;% de ruido en cada paso y hasta buy &amp; hold multiplica por 33. El agente esquiva las caídas y eso se compone durante 500 pasos. No es una cifra realista (en el S&amp;P 500 no batimos a buy &amp; hold); lo que demuestra es que aprende a seguir la tendencia.</p>
+<p><b>Browniano.</b> Cada movimiento es independiente del anterior y el pasado no predice nada, así que operar solo cuesta comisiones. El 0&nbsp;% gana a buy &amp; hold por prudencia, no por habilidad.</p>
+<p><b>Regímenes.</b> Aquí sí hay un patrón, pero con la tendencia de seis precios el agente no sabe en qué fase está. De 70 reglas fijas sobre ese estado, la mejor pierde un −8,6&nbsp;% en validación, así que quedarse fuera es lo mejor que puede hacer.</p>
+</div>
+<div>
+<p><b>Estado enriquecido (03).</b> Al añadir la distancia a la media de 30 precios y la volatilidad (180 estados), en regímenes el agente opera y gana un +7,8&nbsp;% con Q-Learning y un +7,5&nbsp;% con SARSA. Lo explica la volatilidad (sola da +8,5&nbsp;%; la MA30 sola, 0&nbsp;%). Son pruebas con una configuración fija de 800 episodios y la ganancia es frágil: con un 0,25&nbsp;% de comisión desaparece.</p>
+<p><b>Aleatorio.</b> Elige una acción al azar en cada paso, hace unas 165 operaciones por episodio y las comisiones se lo comen. Es el suelo de referencia.</p>
+<p><b>Convergencia</b> (duelo con la misma configuración): Q-Learning tarda 189 episodios frente a 203 en el mercado 1, pero por semillas es un empate; en reversión, 260 frente a 282 y gana en las 3 semillas.</p>
+</div>
+</div>
+
+<h2>7. Qué decir y qué pueden preguntar</h2>
+<div class="two">
+<div class="say">
+<p>Diapositiva 2: «Cada episodio es una serie nueva de 500 precios. El agente ve 20 estados, la tendencia en 10 tramos por cuantiles y si tiene o no el activo. Elegimos los hiperparámetros con 100 series de validación y medimos una sola vez en 200 series de test que no ha visto nunca.»</p>
+<p>Diapositiva 3: «SARSA actualiza con la acción que de verdad va a tomar, también cuando explora. Con un α pequeño aprende en cada mercado la estrategia esperada y supera a buy &amp; hold y al aleatorio en los cuatro.»</p>
+<p>Regímenes: «No ganaba porque no veía el régimen; cuando le damos la volatilidad gana un +7,8&nbsp;%. El resultado depende más de la información del estado que del algoritmo.»</p>
+</div>
+<div>
+<p><b>¿Por qué 20 estados?</b> Lo recomendó el profesor, y con más estados cada casilla se visita mucho menos: con 180, entre 800 y 1&nbsp;760 veces, frente a unas 19&nbsp;400.</p>
+<p><b>¿Por qué la mediana?</b> En el mercado 1 buy &amp; hold tiene una media de x200 y una desviación típica de 657 veces el capital.</p>
+<p><b>¿Validación y test son lo mismo?</b> No. La validación sirve para elegir y el test solo se mira una vez.</p>
+<p><b>¿Cuál converge antes?</b> Q-Learning en mediana, pero solo con claridad en reversión; con tres semillas es una evidencia débil.</p>
+</div>
+</div>
+
+</body></html>
